@@ -1,4 +1,4 @@
-import type { Context } from "https://deno.land/x/oak@v12.4.0/mod.ts";
+import { Context, Router } from "https://deno.land/x/oak@v12.4.0/mod.ts";
 
 export default new Router()
     .get("/members", (context: Context) => getAllMembers(context))
