@@ -9,4 +9,5 @@ memberRouter
     .get("/members", (context: Context) => return getAllMembers(context))
     .get("/members/:id", (context: Context) => return getMember(context));
 
+
 export { memberRouter };
