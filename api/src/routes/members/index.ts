@@ -9,4 +9,4 @@ memberRouter
     .get("/members", (context: Context) => getAllMembers(context))
     .get("/members/:id", (context: Context) => getMember(context));
 
-export default memberRouter;
+export { memberRouter };
