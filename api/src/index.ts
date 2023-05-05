@@ -7,4 +7,4 @@ const app = new Application();
 app.use(memberRouter.routes());
 app.use(memberRouter.allowedMethods());
 
-await app.listen({ port: 8000, secure: true });
+await app.listen({ port: 8000 });

@@ -6,8 +6,8 @@ import { getMember } from "./getMember.ts";
 const memberRouter = new Router();
 
 memberRouter
-    .get("/members", (context: Context) => return getAllMembers(context))
-    .get("/members/:id", (context: Context) => return getMember(context));
+    .get("/members", getAllMembers)
+    .get("/members/:id", getMember);
 
 
 export { memberRouter };
