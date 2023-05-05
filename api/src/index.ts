@@ -1,4 +1,4 @@
-import { Application } from "oak/mod.ts";
+import { Application } from "https://deno.land/x/oak@v12.4.0/mod.ts";
 
 import { members } from "./routes/members/index.ts";
 

@@ -1,4 +1,4 @@
-import type { Context } from "oak/mod.ts";
+import type { Context } from "https://deno.land/x/oak@v12.4.0/mod.ts";
 
 const router = new Router();
 
