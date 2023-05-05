@@ -4,6 +4,7 @@ import memberRoutes from "./routes/members/index.ts";
 
 const app = new Application();
 
+
 app.use(memberRoutes.routes());
 app.use(memberRoutes.allowedMethods());
 
