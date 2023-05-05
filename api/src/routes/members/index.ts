@@ -6,7 +6,7 @@ import { getMember } from "./getMember.ts";
 const memberRouter = new Router();
 
 memberRouter
-    .get("/members", (context: Context) => getAllMembers(context))
-    .get("/members/:id", (context: Context) => getMember(context));
+    .get("/members", (context: Context) => return getAllMembers(context))
+    .get("/members/:id", (context: Context) => return getMember(context));
 
 export { memberRouter };
