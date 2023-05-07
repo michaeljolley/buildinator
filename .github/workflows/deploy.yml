@@ -18,13 +18,13 @@ jobs:
       - name: Deploy Discord to Deno Deploy
         uses: denoland/deployctl@v1
         with:
-          project: { { secrets.DENO_DEPLOY_PROJECT_DISCORD } }
+          project: ${{ secrets.DENO_DEPLOY_PROJECT_DISCORD }}
           entrypoint: "./src/main.ts"
           root: "discord"
 
       - name: Deploy API to Deno Deploy
         uses: denoland/deployctl@v1
         with:
-          project: { { secrets.DENO_DEPLOY_PROJECT_API } }
+          project: ${{ secrets.DENO_DEPLOY_PROJECT_API }}
           entrypoint: "./src/main.ts"
           root: "api"
