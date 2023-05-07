@@ -20,7 +20,7 @@ export async function addMember(identity: OrbitIdentity) {
     }
 }
 
-export async function getMember(identity: OrbitIdentity): Promise<OrbitMember> {
+export async function getMember(identity: OrbitIdentity): Promise<OrbitMember | undefined> {
     try {
         const queryParams = queryString.stringify(identity)
         const response = await fetch(`${membersSlug}/find?${queryParams}`, {
@@ -28,7 +28,7 @@ export async function getMember(identity: OrbitIdentity): Promise<OrbitMember> {
             headers
         });
         const data = await response.json();
-        return data;
+        return data as OrbitMember;
     }
     catch (error) {
         console.error(`ORBIT: getMember: ${error}`);
