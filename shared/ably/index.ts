@@ -9,4 +9,5 @@ ably.connection.on('connected', () => {
 });
 
 export * from "./constants.ts";
+export * from "./gatheringEvent.ts";
 export { ably };

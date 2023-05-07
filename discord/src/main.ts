@@ -2,6 +2,7 @@ import { createBot, Intents, startBot } from "https://deno.land/x/discordeno@18.
 import { ably, Channels, Events } from "../../shared/ably/index.ts";
 import { gatheringEndHandler, gatheringScheduledHandler, gatheringStartHandler } from "./gatherings.ts";
 import { shareableCreatedHandler } from "./shareables.ts";
+import { pullRequestMergedHandler } from "./contributions.ts";
 
 const DISCORD_TOKEN = Deno.env.get("DISCORD_TOKEN");
 
@@ -32,5 +33,8 @@ gatherings.subscribe(Events.GatheringEnd, (message) => gatheringEndHandler(bot, 
 
 const shareables = ably.channels.get(Channels.Shareables);
 shareables.subscribe(Events.ShareableCreated, (message) => shareableCreatedHandler(bot, message));
+
+const contributions = ably.channels.get(Channels.Contributions);
+contributions.subscribe(Events.PullRequestMerged, (message) => pullRequestMergedHandler(bot, message));
 
 await startBot(bot);

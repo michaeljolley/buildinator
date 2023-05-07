@@ -1,5 +1,5 @@
 export type OrbitIdentity = {
-    uid: string;
+    uid?: string;
     source: string;
     email?: string;
     source_host?: string;
