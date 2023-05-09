@@ -1,4 +1,4 @@
-import { OrbitIdentity } from "./index.ts";
+import { OrbitIdentity } from "./orbitIdentity";
 
 export type OrbitMember = {
     data: {
