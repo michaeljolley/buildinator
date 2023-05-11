@@ -14,9 +14,8 @@ import {
   PIPEDREAM_UPDATE_DISCORD_EVENT_ID_WEBHOOK,
 } from '../constants';
 import { GatheringEvent } from '../types/gatheringEvent';
-
-const BUILD_WITH_ME_DISCORD_EVENT_COVER_IMAGE =
-  'https://res.cloudinary.com/dk3rdh3yo/image/upload/v1683497900/discord_brew_with_me_cover.png';
+import { BUILD_WITH_ME_DISCORD_EVENT_COVER_IMAGE } from './BUILD_WITH_ME_DISCORD_EVENT_COVER_IMAGE';
+import { LogArea, LogLevel, log } from '../log';
 
 const DISCORD_INTENTS = [
   GatewayIntentBits.Guilds,
@@ -28,6 +27,9 @@ const DISCORD_INTENTS = [
   GatewayIntentBits.GuildVoiceStates,
   GatewayIntentBits.GuildScheduledEvents,
 ];
+
+const NOTION_EVENT_TYPE_TWITCH = "Twitch";
+const NOTION_EVENT_TYPE_BREW_WITH_ME = "Brew With Me";
 
 export default abstract class Discord {
   private static _client = new Client({
@@ -45,28 +47,37 @@ export default abstract class Discord {
     await this._client.login(DISCORD_TOKEN);
   }
 
-  static async gatheringScheduledHandler({ data: gathering }: { data: GatheringEvent }) {
-    //    const gathering = data as GatheringEvent;
+  static async gatheringScheduledHandler(gathering: GatheringEvent) {
 
     let discordEvent: GuildScheduledEvent | undefined;
 
     if (gathering.discordEventId) {
       // Update the event in Discord
       discordEvent = await this.getScheduledEvent(gathering.discordEventId);
+
+      if (discordEvent) {
+        await this.updateScheduledEvent(discordEvent, gathering);
+        log(LogLevel.Info, LogArea.Discord, `Updated Discord event ${gathering.name}} (${gathering.id})`);
+      }
+
     } else {
       // If the event type is a stream or brew with me, then we need to create a Discord event.
-      if (gathering.type === 'Stream' || gathering.type === 'Brew With Me') {
+      if (gathering.type === NOTION_EVENT_TYPE_TWITCH || gathering.type === NOTION_EVENT_TYPE_BREW_WITH_ME) {
         if (gathering.releaseDateStart && gathering.releaseDateEnd) {
           discordEvent = await this.createScheduledEvent(gathering);
 
-          // Publish new Discord Event Id to Pipedream/Notion
-          await fetch(PIPEDREAM_UPDATE_DISCORD_EVENT_ID_WEBHOOK as string, {
-            method: 'POST',
-            body: JSON.stringify({
-              notionPageId: gathering.id,
-              discordEventId: discordEvent?.entityId,
-            }),
-          });
+          if (discordEvent) {
+            log(LogLevel.Info, LogArea.Discord, `Created Discord event ${discordEvent.name}} (${discordEvent.id})`);
+
+            // Publish new Discord Event Id to Pipedream/Notion
+            await fetch(PIPEDREAM_UPDATE_DISCORD_EVENT_ID_WEBHOOK as string, {
+              method: 'POST',
+              body: JSON.stringify({
+                notionPageId: gathering.id,
+                discordEventId: discordEvent?.id,
+              }),
+            });
+          }
         }
       }
     }
@@ -76,31 +87,57 @@ export default abstract class Discord {
     gathering: GatheringEvent,
   ): Promise<GuildScheduledEvent | undefined> {
     const image =
-      gathering.type === 'Stream' ? null : await this.brewWithMeImage();
+      gathering.type === 'Twitch' ? null : BUILD_WITH_ME_DISCORD_EVENT_COVER_IMAGE;
 
-    const guild = await this._client.guilds.fetch(DISCORD_GUILD_ID as string);
-    return await guild.scheduledEvents.create({
-      name: gathering.name,
-      scheduledStartTime: gathering.releaseDateStart as string,
-      scheduledEndTime: gathering.releaseDateEnd,
-      privacyLevel: GuildScheduledEventPrivacyLevel.GuildOnly,
-      entityType:
-        gathering.type === 'Stream'
-          ? GuildScheduledEventEntityType.External
-          : GuildScheduledEventEntityType.Voice,
-      description: gathering.description as string,
-      channel:
-        gathering.type === 'Stream'
-          ? undefined
-          : (DISCORD_CHANNEL_ID_BREW_WITH_ME as string),
-      entityMetadata: {
-        location:
-          gathering.type === 'Stream'
-            ? 'https://twitch.tv/baldbeardedbuilder'
-            : undefined,
-      },
-      image,
-    });
+    try {
+      const guild = await this._client.guilds.fetch(DISCORD_GUILD_ID as string);
+      return await guild.scheduledEvents.create({
+        name: gathering.name,
+        scheduledStartTime: gathering.releaseDateStart as string,
+        scheduledEndTime: gathering.releaseDateEnd,
+        privacyLevel: GuildScheduledEventPrivacyLevel.GuildOnly,
+        entityType:
+          gathering.type === NOTION_EVENT_TYPE_TWITCH
+            ? GuildScheduledEventEntityType.External
+            : GuildScheduledEventEntityType.Voice,
+        description: gathering.description as string,
+        channel:
+          gathering.type === NOTION_EVENT_TYPE_TWITCH
+            ? undefined
+            : (DISCORD_CHANNEL_ID_BREW_WITH_ME as string),
+        entityMetadata: {
+          location:
+            gathering.type === NOTION_EVENT_TYPE_TWITCH
+              ? 'https://twitch.tv/baldbeardedbuilder'
+              : undefined,
+        },
+        image,
+      });
+    }
+    catch (error) {
+      log(LogLevel.Error, LogArea.Discord, `Error creating Discord event ${gathering.name}}`);
+    }
+
+    return undefined;
+  }
+
+  static async updateScheduledEvent(
+    scheduledEvent: GuildScheduledEvent,
+    gathering: GatheringEvent,
+  ): Promise<GuildScheduledEvent | undefined> {
+    try {
+      return scheduledEvent.edit({
+        name: gathering.name,
+        description: gathering.description as string,
+        scheduledStartTime: gathering.releaseDateStart as string,
+        scheduledEndTime: gathering.releaseDateEnd,
+      });
+    }
+    catch (error) {
+      log(LogLevel.Error, LogArea.Discord, `Error updating Discord event ${gathering.name}}`);
+    }
+
+    return undefined;
   }
 
   static async getScheduledEvent(
@@ -108,22 +145,5 @@ export default abstract class Discord {
   ): Promise<GuildScheduledEvent | undefined> {
     const guild = await this._client.guilds.fetch(DISCORD_GUILD_ID as string);
     return await guild.scheduledEvents.fetch(discordEventId);
-  }
-
-  private static async brewWithMeImage(): Promise<string | undefined> {
-    try {
-      const response = await fetch(BUILD_WITH_ME_DISCORD_EVENT_COVER_IMAGE);
-      const blob = await response.blob();
-      return new Promise(resolve => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          return resolve(reader.result as string);
-        };
-        reader.readAsDataURL(blob);
-      });
-    } catch (error) {
-      console.log(error);
-    }
-    return undefined;
   }
 }
