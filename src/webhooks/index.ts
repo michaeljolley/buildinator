@@ -1,6 +1,6 @@
 import Express from 'express';
 import { EventBus } from '../events';
-import { Events } from '../constants';
+import { Events, PORT } from '../constants';
 import { LogArea, LogLevel, log } from '../log';
 
 export default abstract class Webhooks {
@@ -14,8 +14,8 @@ export default abstract class Webhooks {
       res.status(200).send();
     });
 
-    app.listen(3001, () =>
-      log(LogLevel.Info, LogArea.Webhooks, 'Webhooks server is listening on port 3001')
+    app.listen(PORT, () =>
+      log(LogLevel.Info, LogArea.Webhooks, `Webhooks server is listening on port ${PORT}`)
     );
   }
 }
