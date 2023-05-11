@@ -1,0 +1,51 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+
+name: CD
+
+on:
+  push:
+    branches: [ main ]
+jobs:
+  deploy:
+    if: ${{ github.event.head_commit.committer.name != 'Versioning Action' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.KEY }}
+      - uses: tool3/bump@master
+        id: bump
+        with:
+          github_token: ${{ secrets.KEY }}
+          user: 'Versioning Action'
+          email: 'versioning@github.com'
+          branch: 'main'
+      - uses: azure/docker-login@v1
+        with:
+          login-server: ${{ secrets.ACR_LOGIN }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+      - name: 'Push images to ACR'
+        run: |
+          echo "${{ steps.bump.outputs.version }}"
+          docker build . --tag ${{ secrets.ACR_LOGIN }}/buildinator:${{ steps.bump.outputs.version }} --tag ${{ secrets.ACR_LOGIN }}/buildinator:latest
+          docker push ${{ secrets.ACR_LOGIN }}/buildinator:${{ steps.bump.outputs.version }}
+          docker push ${{ secrets.ACR_LOGIN }}/buildinator:latest
+      - name: 'Login via Azure CLI'
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: 'Deploy to Azure Container Instances'
+        uses: 'azure/aci-deploy@v1'
+        with:
+          resource-group: bbb
+          dns-name-label: nummer-een
+          image: ${{ secrets.ACR_LOGIN }}/numerouno:${{ steps.bump.outputs.version }}
+          registry-login-server: ${{ secrets.ACR_LOGIN }}
+          registry-username: ${{ secrets.ACR_USERNAME }}
+          registry-password: ${{ secrets.ACR_PASSWORD }}
+          name: build-with-me
+          location: 'central us'
+          os-type: Linux
+          restart-policy: Always
+          secure-environment-variables: ORBIT_API_KEY=${{ secrets.ORBIT_API_KEY }} ORBIT_WORKSPACE=${{ secrets.ORBIT_WORKSPACE }} DISCORD_GUILD_ID=${{ secrets.DISCORD_GUILD_ID }} DISCORD_CHANNEL_ID_BREW_WITH_ME=${{ secrets.DISCORD_CHANNEL_ID_BREW_WITH_ME }} DISCORD_ROLE_CODE_CONTRIBUTOR=${{ secrets.DISCORD_ROLE_CODE_CONTRIBUTOR }} DISCORD_ROLE_BUILDERS=${{ secrets.DISCORD_ROLE_BUILDERS }} DISCORD_ROLE_CREATORS=${{ secrets.DISCORD_ROLE_CREATORS }} DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }} PIPEDREAM_UPDATE_DISCORD_EVENT_ID_WEBHOOK=${{ secrets.PIPEDREAM_UPDATE_DISCORD_EVENT_ID_WEBHOOK }}
