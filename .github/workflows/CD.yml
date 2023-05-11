@@ -39,12 +39,12 @@ jobs:
         uses: 'azure/aci-deploy@v1'
         with:
           resource-group: bbb
-          dns-name-label: nummer-een
-          image: ${{ secrets.ACR_LOGIN }}/numerouno:${{ steps.bump.outputs.version }}
+          dns-name-label: buildinator
+          image: ${{ secrets.ACR_LOGIN }}/buildinator:${{ steps.bump.outputs.version }}
           registry-login-server: ${{ secrets.ACR_LOGIN }}
           registry-username: ${{ secrets.ACR_USERNAME }}
           registry-password: ${{ secrets.ACR_PASSWORD }}
-          name: build-with-me
+          name: buildinator
           location: 'central us'
           os-type: Linux
           restart-policy: Always
