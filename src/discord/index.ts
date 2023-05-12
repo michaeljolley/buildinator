@@ -6,7 +6,7 @@ import {
   GuildScheduledEventEntityType,
   GuildScheduledEventPrivacyLevel,
 } from 'discord.js';
-import { apStyleTitleCase } from 'ap-style-title-case';
+import { titleCase } from "title-case";
 import { EventBus } from '../events';
 import {
   DISCORD_CHANNEL_ID_BREW_WITH_ME,
@@ -258,7 +258,7 @@ export default abstract class Discord {
   ): Promise<string | undefined> {
     try {
       const titleString = `/l_text:Cairo_56_bold_line_spacing_-45:${encodeURI(
-        apStyleTitleCase(gathering.name),
+        titleCase(gathering.name),
       )},g_north_west,x_65,y_255,w_900,c_fit,co_rgb:FFFFFF`;
       const urlString = `/l_text:Cairo_24_regular_letter_spacing_4:twitch.tv%5Cbaldbeardedbuilder,g_north_west,x_65,y_215,co_rgb:0AC2C2`;
 
