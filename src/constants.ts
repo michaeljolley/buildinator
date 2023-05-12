@@ -10,8 +10,7 @@ export const DISCORD_CHANNEL_ID_BREW_WITH_ME =
 export const DISCORD_TOKEN = process.env.DISCORD_TOKEN;
 export const PIPEDREAM_UPDATE_DISCORD_EVENT_ID_WEBHOOK =
   process.env.PIPEDREAM_UPDATE_DISCORD_EVENT_ID_WEBHOOK;
-export const PORT =
-  process.env.PORT;
+export const PORT = process.env.PORT;
 
 export const membersSlug = `${ORBIT_BASE_API_URL}/${ORBIT_WORKSPACE}/members`;
 export const activitiesSlug = `${ORBIT_BASE_API_URL}/${ORBIT_WORKSPACE}/activities`;
@@ -21,6 +20,9 @@ export const orbitHeaders = {
   Authorization: `Bearer ${ORBIT_API_KEY}`,
 };
 
+/**
+ * Events emitted from EventBus.
+ */
 export enum Events {
   GatheringScheduled = 'gathering:scheduled',
   GatheringStart = 'gathering:start',
