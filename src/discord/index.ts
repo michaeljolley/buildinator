@@ -75,7 +75,7 @@ export default abstract class Discord {
         // If the Notion event has a `discordEventId`, we've already created
         // it in Discord. In that event, we need to update/delete the event
         // in Discord.
-        gathering.discordEventId === undefined
+        gathering.discordEventId === null
           ? await this.createScheduledEvent(gathering)
           : await this.updateScheduledEvent(gathering);
       }
