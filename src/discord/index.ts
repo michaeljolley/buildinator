@@ -6,8 +6,8 @@ import {
   GuildScheduledEventEntityType,
   GuildScheduledEventPrivacyLevel,
 } from 'discord.js';
-import {apStyleTitleCase} from 'ap-style-title-case';
-import {EventBus} from '../events';
+import { apStyleTitleCase } from 'ap-style-title-case';
+import { EventBus } from '../events';
 import {
   DISCORD_CHANNEL_ID_BREW_WITH_ME,
   DISCORD_GUILD_ID,
@@ -15,9 +15,9 @@ import {
   Events,
   PIPEDREAM_UPDATE_DISCORD_EVENT_ID_WEBHOOK,
 } from '../constants';
-import {GatheringEvent} from '../types/gatheringEvent';
-import {BUILD_WITH_ME_DISCORD_EVENT_COVER_IMAGE} from './BUILD_WITH_ME_DISCORD_EVENT_COVER_IMAGE';
-import {LogArea, LogLevel, log} from '../log';
+import { GatheringEvent } from '../types/gatheringEvent';
+import { BUILD_WITH_ME_DISCORD_EVENT_COVER_IMAGE } from './BUILD_WITH_ME_DISCORD_EVENT_COVER_IMAGE';
+import { LogArea, LogLevel, log } from '../log';
 
 const DISCORD_INTENTS = [
   GatewayIntentBits.Guilds,
@@ -169,21 +169,36 @@ export default abstract class Discord {
         return undefined;
       }
 
-      // The event was found, so update it.
-      const updatedEvent = discordEvent.edit({
-        name: gathering.name,
-        description: gathering.description as string,
-        scheduledStartTime: gathering.releaseDateStart as string,
-        scheduledEndTime: gathering.releaseDateEnd,
-      });
+      // If the event was canceled in Notion, cancel it in Discord. Otherwise,
+      // update it in Discord.
+      if (gathering.status === 'Canceled') {
+        const deletedEvent = await discordEvent.delete();
 
-      if (updatedEvent !== undefined) {
-        log(
-          LogLevel.Info,
-          LogArea.Discord,
-          `Updated Discord event '${gathering.name}' (${gathering.id})`,
-        );
+        if (deletedEvent !== undefined) {
+          log(
+            LogLevel.Info,
+            LogArea.Discord,
+            `Canceled Discord event '${gathering.name}' (${gathering.id})`,
+          );
+        }
+      } else {
+        // The event was found, so update it.
+        const updatedEvent = discordEvent.edit({
+          name: gathering.name,
+          description: gathering.description as string,
+          scheduledStartTime: gathering.releaseDateStart as string,
+          scheduledEndTime: gathering.releaseDateEnd,
+        });
+
+        if (updatedEvent !== undefined) {
+          log(
+            LogLevel.Info,
+            LogArea.Discord,
+            `Updated Discord event '${gathering.name}' (${gathering.id})`,
+          );
+        }
       }
+
     } catch (error) {
       log(
         LogLevel.Error,
