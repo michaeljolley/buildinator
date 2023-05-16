@@ -22,7 +22,7 @@ export default abstract class Webhooks {
       res.status(200).send();
     });
 
-    app.listen(PORT, () =>
+    app.listen(PORT, '0.0.0.0', () =>
       log(
         LogLevel.Info,
         LogArea.Webhooks,

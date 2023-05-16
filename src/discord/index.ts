@@ -5,19 +5,23 @@ import {
   GuildScheduledEvent,
   GuildScheduledEventEntityType,
   GuildScheduledEventPrivacyLevel,
+  GuildScheduledEventStatus,
+  VoiceState,
 } from 'discord.js';
-import { titleCase } from "title-case";
-import { EventBus } from '../events';
+import {titleCase} from 'title-case';
+import {EventBus} from '../events';
 import {
   DISCORD_CHANNEL_ID_BREW_WITH_ME,
   DISCORD_GUILD_ID,
+  DISCORD_ROLE_BUILDERS,
   DISCORD_TOKEN,
   Events,
   PIPEDREAM_UPDATE_DISCORD_EVENT_ID_WEBHOOK,
 } from '../constants';
-import { GatheringEvent } from '../types/gatheringEvent';
-import { BUILD_WITH_ME_DISCORD_EVENT_COVER_IMAGE } from './BUILD_WITH_ME_DISCORD_EVENT_COVER_IMAGE';
-import { LogArea, LogLevel, log } from '../log';
+import {GatheringAttendee} from '../types/gatheringAttendee';
+import {GatheringEvent} from '../types/gatheringEvent';
+import {BUILD_WITH_ME_DISCORD_EVENT_COVER_IMAGE} from './BUILD_WITH_ME_DISCORD_EVENT_COVER_IMAGE';
+import {LogArea, LogLevel, log} from '../log';
 
 const DISCORD_INTENTS = [
   GatewayIntentBits.Guilds,
@@ -43,19 +47,127 @@ export default abstract class Discord {
     intents: DISCORD_INTENTS,
   });
 
+  private static _attendees: Record<string, GatheringAttendee> = {};
+
   /**
    * Initializes the Discord client and registers event handlers.
    */
   static async init(): Promise<void> {
     // Register any EventBus event handlers within this on 'ready' event.
-    this._client.on('ready', () => {
+    this._client.on('ready', async () => {
       EventBus.eventEmitter.on(
         Events.GatheringScheduled,
         this.gatheringScheduledHandler.bind(this),
       );
+
+      await this.registerScheduledEventListeners();
+      await this.joinBrewWithMeChannel();
     });
 
     await this._client.login(DISCORD_TOKEN);
+  }
+
+  static async registerScheduledEventListeners(): Promise<void> {
+    this._client.on(
+      'guildScheduledEventUpdate',
+      this.handleGuildScheduledEventUpdate.bind(this),
+    );
+  }
+
+  static async handleGuildScheduledEventUpdate(
+    oldGuildScheduledEvent: GuildScheduledEvent<GuildScheduledEventStatus> | null,
+    newGuildScheduledEvent: GuildScheduledEvent<GuildScheduledEventStatus>,
+  ): Promise<void> {
+    if (newGuildScheduledEvent.channelId === DISCORD_CHANNEL_ID_BREW_WITH_ME) {
+      if (
+        newGuildScheduledEvent.status === GuildScheduledEventStatus.Completed
+      ) {
+        const guild = await this.getGuild();
+
+        if (guild) {
+          for (const [memberId, gatheringAttendee] of Object.entries(
+            this._attendees,
+          )) {
+            let totalDurationInMinutes = gatheringAttendee.durationInMinutes;
+
+            if (gatheringAttendee.join) {
+              totalDurationInMinutes +=
+                (new Date().getTime() - gatheringAttendee.join.getTime()) /
+                1000 /
+                60;
+            }
+
+            if (totalDurationInMinutes >= 30) {
+              const member = await guild.members.fetch(memberId);
+
+              if (!member.roles.cache.has(DISCORD_ROLE_BUILDERS as string)) {
+                member.roles.add(DISCORD_ROLE_BUILDERS as string);
+              }
+            }
+          }
+
+          this._attendees = {};
+        }
+      }
+    }
+  }
+
+  static async joinBrewWithMeChannel(): Promise<void> {
+    const guild = await this.getGuild();
+
+    if (guild) {
+      const brewWithMeChannel = await guild.channels.fetch(
+        DISCORD_CHANNEL_ID_BREW_WITH_ME as string,
+      );
+      if (brewWithMeChannel && brewWithMeChannel.isVoiceBased()) {
+        this._client.on(
+          'voiceStateUpdate',
+          await this.voiceStateUpdateHandler.bind(this),
+        );
+      }
+    }
+  }
+
+  static async voiceStateUpdateHandler(
+    oldState: VoiceState,
+    newState: VoiceState,
+  ): Promise<void> {
+    const guild = await this.getGuild();
+
+    if (guild) {
+      const scheduledEvents = await guild.scheduledEvents.fetch();
+      const activeEvent = scheduledEvents.find(event => {
+        return (
+          event.channelId === DISCORD_CHANNEL_ID_BREW_WITH_ME &&
+          event.isActive()
+        );
+      });
+
+      if (activeEvent) {
+        // If an event is active:
+        if (newState.member) {
+          const member = this._attendees[newState.member.id] || {
+            join: new Date(),
+            durationInMinutes: 0,
+          };
+
+          // If the newState comes in with a channelId, it's a join event.
+          if (newState.channelId === DISCORD_CHANNEL_ID_BREW_WITH_ME) {
+            member.join = new Date();
+          }
+          // otherwise, it's a leave event
+          else {
+            if (member.join) {
+              member.durationInMinutes +=
+                (new Date().getTime() - member.join.getTime()) / 1000 / 60;
+              member.join = undefined;
+            }
+          }
+
+          this._attendees[newState.member.id] = member;
+        }
+      }
+    }
   }
 
   /**
@@ -198,7 +310,6 @@ export default abstract class Discord {
           );
         }
       }
-
     } catch (error) {
       log(
         LogLevel.Error,
