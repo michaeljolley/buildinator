@@ -32,3 +32,7 @@ export enum Events {
   ShareableCreated = 'shareable:created',
   PullRequestMerged = 'contributions:pullrequest:merged',
 }
+
+export enum OrbitActivities {
+  BrewWithMe = 'event:discord:brew_with_me',
+}

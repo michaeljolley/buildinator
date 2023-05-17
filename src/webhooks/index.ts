@@ -1,8 +1,8 @@
-import Express, { Request } from 'express';
-import crypto from "crypto";
-import { EventBus } from '../events';
-import { Events, GITHUB_WEBHOOK_SECRET, PORT } from '../constants';
-import { LogArea, LogLevel, log } from '../log';
+import Express, {Request} from 'express';
+import crypto from 'crypto';
+import {EventBus} from '../events';
+import {Events, GITHUB_WEBHOOK_SECRET, PORT} from '../constants';
+import {LogArea, LogLevel, log} from '../log';
 
 /**
  * The Webhooks class is static for the entire application. It is responsible
@@ -45,14 +45,16 @@ export default abstract class Webhooks {
 
 function validateGitHubWebhook(request: Request) {
   // calculate the signature
-  const expectedSignature = "sha1=" +
-    crypto.createHmac("sha1", GITHUB_WEBHOOK_SECRET as string)
+  const expectedSignature =
+    'sha1=' +
+    crypto
+      .createHmac('sha1', GITHUB_WEBHOOK_SECRET as string)
       .update(JSON.stringify(request.body))
-      .digest("hex");
+      .digest('hex');
 
   // compare the signature against the one in the request
-  const signature = request.headers["x-hub-signature"];
+  const signature = request.headers['x-hub-signature'];
   if (signature !== expectedSignature) {
-    throw new Error("Invalid signature.");
+    throw new Error('Invalid signature.');
   }
 }

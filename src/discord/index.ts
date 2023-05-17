@@ -8,22 +8,23 @@ import {
   GuildScheduledEventStatus,
   VoiceState,
 } from 'discord.js';
-import { titleCase } from 'title-case';
-import { EventBus } from '../events';
+import {titleCase} from 'title-case';
+import {EventBus} from '../events';
 import {
   DISCORD_CHANNEL_ID_BREW_WITH_ME,
   DISCORD_GUILD_ID,
   DISCORD_ROLE_BUILDERS,
   DISCORD_TOKEN,
   Events,
+  OrbitActivities,
   PIPEDREAM_UPDATE_DISCORD_EVENT_ID_WEBHOOK,
 } from '../constants';
-import { GatheringAttendee } from '../types/gatheringAttendee';
-import { GatheringEvent } from '../types/gatheringEvent';
-import { BUILD_WITH_ME_DISCORD_EVENT_COVER_IMAGE } from './BUILD_WITH_ME_DISCORD_EVENT_COVER_IMAGE';
-import { LogArea, LogLevel, log } from '../log';
-import { GitHubPullRequestEvent } from '../types/githubPullRequestEvent';
-import { Orbit } from '../orbit';
+import {GatheringAttendee} from '../types/gatheringAttendee';
+import {GatheringEvent} from '../types/gatheringEvent';
+import {BUILD_WITH_ME_DISCORD_EVENT_COVER_IMAGE} from './BUILD_WITH_ME_DISCORD_EVENT_COVER_IMAGE';
+import {LogArea, LogLevel, log} from '../log';
+import {GitHubPullRequestEvent} from '../types/githubPullRequestEvent';
+import {Orbit} from '../orbit';
 
 const DISCORD_INTENTS = [
   GatewayIntentBits.Guilds,
@@ -92,8 +93,11 @@ export default abstract class Discord {
     oldGuildScheduledEvent: GuildScheduledEvent<GuildScheduledEventStatus> | null,
     newGuildScheduledEvent: GuildScheduledEvent<GuildScheduledEventStatus>,
   ): Promise<void> {
-
-    log(LogLevel.Info, LogArea.Discord, `Scheduled Event updated: ${newGuildScheduledEvent.name} (${newGuildScheduledEvent.status})`)
+    log(
+      LogLevel.Info,
+      LogArea.Discord,
+      `Scheduled Event updated: ${newGuildScheduledEvent.name} (${newGuildScheduledEvent.status})`,
+    );
 
     // If the event is a Brew With Me event, and it's completed, we need to
     // review any attendees and possibly assign them the Builders role.
@@ -111,7 +115,9 @@ export default abstract class Discord {
     }
   }
 
-  private static startEvent(newGuildScheduledEvent: GuildScheduledEvent<GuildScheduledEventStatus>) {
+  private static startEvent(
+    newGuildScheduledEvent: GuildScheduledEvent<GuildScheduledEventStatus>,
+  ) {
     const existingAttendees = newGuildScheduledEvent.channel?.members.values();
     if (existingAttendees) {
       for (const m of existingAttendees) {
@@ -119,17 +125,17 @@ export default abstract class Discord {
           memberId: m.id,
           join: new Date(),
           durationInMinutes: 0,
-        }
+        };
       }
     }
   }
 
-  private static async endEvent(newGuildScheduledEvent: GuildScheduledEvent<GuildScheduledEventStatus>) {
+  private static async endEvent(
+    newGuildScheduledEvent: GuildScheduledEvent<GuildScheduledEventStatus>,
+  ) {
     const guild = await this.getGuild();
     if (guild) {
       const membersToReview: string[] = [];
-
-      log(LogLevel.Info, LogArea.Discord, JSON.stringify(this._attendees));
 
       for (const [memberId, gatheringAttendee] of Object.entries(
         this._attendees,
@@ -150,29 +156,37 @@ export default abstract class Discord {
         // events are 1 hour long), assign the Builders role.
         if (totalDurationInMinutes >= 30) {
           membersToReview.push(member.nickname || member.user.username);
+          member.roles.add(DISCORD_ROLE_BUILDERS as string);
 
           if (!member.roles.cache.has(DISCORD_ROLE_BUILDERS as string)) {
-            member.roles.add(DISCORD_ROLE_BUILDERS as string);
+            await member.roles.add(DISCORD_ROLE_BUILDERS as string);
           }
         }
 
         // If the attendee was around for at least 15 minutes, log their
         // attendance in Orbit.
         if (totalDurationInMinutes >= 15) {
-          await Orbit.addActivity({
-            title: `Attended ${newGuildScheduledEvent.name}`,
-            description: `Attended ${newGuildScheduledEvent.name} for ${totalDurationInMinutes} minutes`,
-            activity_type: "custom",
-            activity_type_key: "event:discord:brew-with-me",
-            link: `https://discord.com/channels/${DISCORD_GUILD_ID}/${DISCORD_CHANNEL_ID_BREW_WITH_ME}`,
-          }, {
-            uid: member.id,
-            source: "discord"
-          })
+          await Orbit.addActivity(
+            {
+              title: `Attended ${newGuildScheduledEvent.name}`,
+              description: `Attended ${newGuildScheduledEvent.name} for ${totalDurationInMinutes} minutes`,
+              activity_type: 'buildinator',
+              activity_type_key: OrbitActivities.BrewWithMe,
+              link: `https://discord.com/channels/${DISCORD_GUILD_ID}/${DISCORD_CHANNEL_ID_BREW_WITH_ME}`,
+            },
+            {
+              uid: member.id,
+              source: 'discord',
+            },
+          );
         }
       }
 
-      log(LogLevel.Info, LogArea.Discord, `${membersToReview.length} members attended ${newGuildScheduledEvent.name}.}`)
+      log(
+        LogLevel.Info,
+        LogArea.Discord,
+        `${membersToReview.length} members attended ${newGuildScheduledEvent.name}.}`,
+      );
 
       this._attendees = {};
     }
@@ -269,8 +283,14 @@ export default abstract class Discord {
     }
   }
 
-  static async pullRequestMergedHandler(pullRequestEvent: GitHubPullRequestEvent) {
-
+  static async pullRequestMergedHandler(
+    pullRequestEvent: GitHubPullRequestEvent,
+  ) {
+    log(
+      LogLevel.Info,
+      LogArea.Discord,
+      `Pull request merged: ${JSON.stringify(pullRequestEvent)}`,
+    );
   }
 
   /**
