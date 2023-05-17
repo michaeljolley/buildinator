@@ -98,62 +98,83 @@ export default abstract class Discord {
     // If the event is a Brew With Me event, and it's completed, we need to
     // review any attendees and possibly assign them the Builders role.
     if (newGuildScheduledEvent.channelId === DISCORD_CHANNEL_ID_BREW_WITH_ME) {
-      if (
-        newGuildScheduledEvent.status === GuildScheduledEventStatus.Completed
-      ) {
-        const guild = await this.getGuild();
+      switch (newGuildScheduledEvent.status) {
+        case GuildScheduledEventStatus.Active:
+          this.startEvent(newGuildScheduledEvent);
+          break;
+        case GuildScheduledEventStatus.Completed:
+          await this.endEvent(newGuildScheduledEvent);
+          break;
+        default:
+          break;
+      }
+    }
+  }
 
-        if (guild) {
-          const membersToReview: string[] = [];
-
-          log(LogLevel.Info, LogArea.Discord, JSON.stringify(this._attendees));
-
-          for (const [memberId, gatheringAttendee] of Object.entries(
-            this._attendees,
-          )) {
-            let totalDurationInMinutes = gatheringAttendee.durationInMinutes;
-
-            // Update the duration for each attendee
-            if (gatheringAttendee.join) {
-              totalDurationInMinutes +=
-                (new Date().getTime() - gatheringAttendee.join.getTime()) /
-                1000 /
-                60;
-            }
-
-            const member = await guild.members.fetch(memberId);
-
-            // If the attendee was around for more than 30 minutes (Brew With Me
-            // events are 1 hour long), assign the Builders role.
-            if (totalDurationInMinutes >= 30) {
-              membersToReview.push(member.nickname || member.user.username);
-
-              if (!member.roles.cache.has(DISCORD_ROLE_BUILDERS as string)) {
-                member.roles.add(DISCORD_ROLE_BUILDERS as string);
-              }
-            }
-
-            // If the attendee was around for at least 15 minutes, log their
-            // attendance in Orbit.
-            if (totalDurationInMinutes >= 15) {
-              await Orbit.addActivity({
-                title: `Attended ${newGuildScheduledEvent.name}`,
-                description: `Attended ${newGuildScheduledEvent.name} for ${totalDurationInMinutes} minutes`,
-                activity_type: "custom",
-                activity_type_key: "event:discord:brew-with-me",
-                link: `https://discord.com/channels/${DISCORD_GUILD_ID}/${DISCORD_CHANNEL_ID_BREW_WITH_ME}`,
-              }, {
-                uid: member.id,
-                source: "discord"
-              })
-            }
-          }
-
-          log(LogLevel.Info, LogArea.Discord, `${membersToReview.length} members attended ${newGuildScheduledEvent.name}.}`)
-
-          this._attendees = {};
+  private static startEvent(newGuildScheduledEvent: GuildScheduledEvent<GuildScheduledEventStatus>) {
+    const existingAttendees = newGuildScheduledEvent.channel?.members.values();
+    if (existingAttendees) {
+      for (const m of existingAttendees) {
+        this._attendees[m.id] = {
+          memberId: m.id,
+          join: new Date(),
+          durationInMinutes: 0,
         }
       }
+    }
+  }
+
+  private static async endEvent(newGuildScheduledEvent: GuildScheduledEvent<GuildScheduledEventStatus>) {
+    const guild = await this.getGuild();
+    if (guild) {
+      const membersToReview: string[] = [];
+
+      log(LogLevel.Info, LogArea.Discord, JSON.stringify(this._attendees));
+
+      for (const [memberId, gatheringAttendee] of Object.entries(
+        this._attendees,
+      )) {
+        let totalDurationInMinutes = gatheringAttendee.durationInMinutes;
+
+        // Update the duration for each attendee
+        if (gatheringAttendee.join) {
+          totalDurationInMinutes +=
+            (new Date().getTime() - gatheringAttendee.join.getTime()) /
+            1000 /
+            60;
+        }
+
+        const member = await guild.members.fetch(memberId);
+
+        // If the attendee was around for more than 30 minutes (Brew With Me
+        // events are 1 hour long), assign the Builders role.
+        if (totalDurationInMinutes >= 30) {
+          membersToReview.push(member.nickname || member.user.username);
+
+          if (!member.roles.cache.has(DISCORD_ROLE_BUILDERS as string)) {
+            member.roles.add(DISCORD_ROLE_BUILDERS as string);
+          }
+        }
+
+        // If the attendee was around for at least 15 minutes, log their
+        // attendance in Orbit.
+        if (totalDurationInMinutes >= 15) {
+          await Orbit.addActivity({
+            title: `Attended ${newGuildScheduledEvent.name}`,
+            description: `Attended ${newGuildScheduledEvent.name} for ${totalDurationInMinutes} minutes`,
+            activity_type: "custom",
+            activity_type_key: "event:discord:brew-with-me",
+            link: `https://discord.com/channels/${DISCORD_GUILD_ID}/${DISCORD_CHANNEL_ID_BREW_WITH_ME}`,
+          }, {
+            uid: member.id,
+            source: "discord"
+          })
+        }
+      }
+
+      log(LogLevel.Info, LogArea.Discord, `${membersToReview.length} members attended ${newGuildScheduledEvent.name}.}`)
+
+      this._attendees = {};
     }
   }
 
@@ -200,6 +221,7 @@ export default abstract class Discord {
         // If an event is active:
         if (newState.member) {
           const member = this._attendees[newState.member.id] || {
+            memberId: newState.member.id,
             join: new Date(),
             durationInMinutes: 0,
           };
@@ -291,7 +313,7 @@ export default abstract class Discord {
         log(
           LogLevel.Info,
           LogArea.Discord,
-          `Created Discord event ${discordEvent.name}} (${discordEvent.id})`,
+          `Created Discord event ${discordEvent.name} (${discordEvent.id})`,
         );
 
         // Publish new Discord Event Id to Pipedream/Notion
