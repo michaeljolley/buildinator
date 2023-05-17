@@ -8,8 +8,8 @@ import {
   GuildScheduledEventStatus,
   VoiceState,
 } from 'discord.js';
-import {titleCase} from 'title-case';
-import {EventBus} from '../events';
+import { titleCase } from 'title-case';
+import { EventBus } from '../events';
 import {
   DISCORD_CHANNEL_ID_BREW_WITH_ME,
   DISCORD_GUILD_ID,
@@ -18,10 +18,12 @@ import {
   Events,
   PIPEDREAM_UPDATE_DISCORD_EVENT_ID_WEBHOOK,
 } from '../constants';
-import {GatheringAttendee} from '../types/gatheringAttendee';
-import {GatheringEvent} from '../types/gatheringEvent';
-import {BUILD_WITH_ME_DISCORD_EVENT_COVER_IMAGE} from './BUILD_WITH_ME_DISCORD_EVENT_COVER_IMAGE';
-import {LogArea, LogLevel, log} from '../log';
+import { GatheringAttendee } from '../types/gatheringAttendee';
+import { GatheringEvent } from '../types/gatheringEvent';
+import { BUILD_WITH_ME_DISCORD_EVENT_COVER_IMAGE } from './BUILD_WITH_ME_DISCORD_EVENT_COVER_IMAGE';
+import { LogArea, LogLevel, log } from '../log';
+import { GitHubPullRequestEvent } from '../types/githubPullRequestEvent';
+import { Orbit } from '../orbit';
 
 const DISCORD_INTENTS = [
   GatewayIntentBits.Guilds,
@@ -59,25 +61,42 @@ export default abstract class Discord {
         Events.GatheringScheduled,
         this.gatheringScheduledHandler.bind(this),
       );
+      EventBus.eventEmitter.on(
+        Events.PullRequestMerged,
+        this.pullRequestMergedHandler.bind(this),
+      );
 
-      await this.registerScheduledEventListeners();
+      await this.registerDiscordEventListeners();
       await this.joinBrewWithMeChannel();
     });
 
     await this._client.login(DISCORD_TOKEN);
   }
 
-  static async registerScheduledEventListeners(): Promise<void> {
+  /**
+   * Register any Discord event listeners here.
+   */
+  static async registerDiscordEventListeners(): Promise<void> {
     this._client.on(
       'guildScheduledEventUpdate',
       this.handleGuildScheduledEventUpdate.bind(this),
     );
   }
 
+  /**
+   * Handle updates to Discord scheduled events.
+   * @param oldGuildScheduledEvent Old version of the scheduled event
+   * @param newGuildScheduledEvent Updated version of the scheduled event
+   */
   static async handleGuildScheduledEventUpdate(
     oldGuildScheduledEvent: GuildScheduledEvent<GuildScheduledEventStatus> | null,
     newGuildScheduledEvent: GuildScheduledEvent<GuildScheduledEventStatus>,
   ): Promise<void> {
+
+    log(LogLevel.Info, LogArea.Discord, `Scheduled Event updated: ${newGuildScheduledEvent.name} (${newGuildScheduledEvent.status})`)
+
+    // If the event is a Brew With Me event, and it's completed, we need to
+    // review any attendees and possibly assign them the Builders role.
     if (newGuildScheduledEvent.channelId === DISCORD_CHANNEL_ID_BREW_WITH_ME) {
       if (
         newGuildScheduledEvent.status === GuildScheduledEventStatus.Completed
@@ -85,11 +104,16 @@ export default abstract class Discord {
         const guild = await this.getGuild();
 
         if (guild) {
+          const membersToReview: string[] = [];
+
+          log(LogLevel.Info, LogArea.Discord, JSON.stringify(this._attendees));
+
           for (const [memberId, gatheringAttendee] of Object.entries(
             this._attendees,
           )) {
             let totalDurationInMinutes = gatheringAttendee.durationInMinutes;
 
+            // Update the duration for each attendee
             if (gatheringAttendee.join) {
               totalDurationInMinutes +=
                 (new Date().getTime() - gatheringAttendee.join.getTime()) /
@@ -97,14 +121,35 @@ export default abstract class Discord {
                 60;
             }
 
+            const member = await guild.members.fetch(memberId);
+
+            // If the attendee was around for more than 30 minutes (Brew With Me
+            // events are 1 hour long), assign the Builders role.
             if (totalDurationInMinutes >= 30) {
-              const member = await guild.members.fetch(memberId);
+              membersToReview.push(member.nickname || member.user.username);
 
               if (!member.roles.cache.has(DISCORD_ROLE_BUILDERS as string)) {
                 member.roles.add(DISCORD_ROLE_BUILDERS as string);
               }
             }
+
+            // If the attendee was around for at least 15 minutes, log their
+            // attendance in Orbit.
+            if (totalDurationInMinutes >= 15) {
+              await Orbit.addActivity({
+                title: `Attended ${newGuildScheduledEvent.name}`,
+                description: `Attended ${newGuildScheduledEvent.name} for ${totalDurationInMinutes} minutes`,
+                activity_type: "custom",
+                activity_type_key: "event:discord:brew-with-me",
+                link: `https://discord.com/channels/${DISCORD_GUILD_ID}/${DISCORD_CHANNEL_ID_BREW_WITH_ME}`,
+              }, {
+                uid: member.id,
+                source: "discord"
+              })
+            }
           }
+
+          log(LogLevel.Info, LogArea.Discord, `${membersToReview.length} members attended ${newGuildScheduledEvent.name}.}`)
 
           this._attendees = {};
         }
@@ -112,6 +157,9 @@ export default abstract class Discord {
     }
   }
 
+  /**
+   * Register listening to events on the Brew With me channel
+   */
   static async joinBrewWithMeChannel(): Promise<void> {
     const guild = await this.getGuild();
 
@@ -128,6 +176,11 @@ export default abstract class Discord {
     }
   }
 
+  /**
+   * Handles voice state changes to members in the Brew With Me channel
+   * @param oldState Old voice state of the member
+   * @param newState New voice state of the member
+   */
   static async voiceStateUpdateHandler(
     oldState: VoiceState,
     newState: VoiceState,
@@ -192,6 +245,10 @@ export default abstract class Discord {
           : await this.updateScheduledEvent(gathering);
       }
     }
+  }
+
+  static async pullRequestMergedHandler(pullRequestEvent: GitHubPullRequestEvent) {
+
   }
 
   /**

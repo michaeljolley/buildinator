@@ -1,81 +1,81 @@
-// import * as queryString from "https://deno.land/x/querystring@v1.0.2/mod.js";
+import querystring from "querystring";
+import { OrbitIdentity } from "../types/orbitIdentity";
+import { activitiesSlug, membersSlug, orbitHeaders } from "../constants";
+import { OrbitMember } from "../types/orbitMember";
+import { OrbitActivity } from "../types/orbityActivity";
 
-// import { activitiesSlug, headers, membersSlug } from "./constants.ts";
-// import { OrbitIdentity } from "./orbitIdentity.ts";
-// import { OrbitActivity } from "./orbityActivity.ts";
-// import { OrbitMember } from "./orbitMember.ts";
+export abstract class Orbit {
 
-// export async function addMember(identity: OrbitIdentity) {
-//     try {
-//         const response = await fetch(membersSlug, {
-//             method: 'POST',
-//             headers,
-//             body: JSON.stringify(identity)
-//         });
-//         const data = await response.json();
-//         return data;
-//     }
-//     catch (error) {
-//         console.error(`ORBIT: addMember: ${error}`);
-//     }
-// }
+	/**
+	 * Adds or updates a member in Orbit
+	 * @param identity Orbit identity object of a member
+	 */
+	static async addMember(identity: OrbitIdentity): Promise<void> {
+		try {
+			await this.sendRequest(membersSlug, "POST", identity);
+		}
+		catch (error) {
+			console.error(`ORBIT: addMember: ${error}`);
+		}
+	}
 
-// export async function getMember(identity: OrbitIdentity): Promise<OrbitMember | undefined> {
-//     try {
-//         const queryParams = queryString.stringify(identity)
-//         const response = await fetch(`${membersSlug}/find?${queryParams}`, {
-//             method: 'GET',
-//             headers
-//         });
-//         const data = await response.json();
-//         return data as OrbitMember;
-//     }
-//     catch (error) {
-//         console.error(`ORBIT: getMember: ${error}`);
-//     }
-// }
+	/**
+	 * Retrieves a member from Orbit
+	 * @param identity An Orbit identity that identifies a member
+	 * @returns The found Orbit member or undefined
+	 */
+	static async getMember(identity: OrbitIdentity): Promise<OrbitMember | undefined> {
+		try {
+			const queryParams = querystring.stringify(identity)
+			return await this.sendRequest(`${membersSlug}/find?${queryParams}`, "GET");
+		}
+		catch (error) {
+			console.error(`ORBIT: getMember: ${error}`);
+		}
+	}
 
-// export async function addContentActivity(url: string, identity: OrbitIdentity) {
-//     try {
-//         const response = await fetch(activitiesSlug, {
-//             method: 'POST',
-//             headers,
-//             body: JSON.stringify({
-//                 activity: {
-//                     url,
-//                     activity_type: 'content'
-//                 },
-//                 identity
-//             })
-//         });
-//         const data = await response.json();
-//         return data;
-//     }
-//     catch (error) {
-//         console.error(`ORBIT: addContentActivity: ${error}`);
-//     }
-// }
+	/**
+	 * Adds an activity to an Orbit member. Creates the member if they don't exist.
+	 * @param activity Activity performed
+	 * @param identity Member identity
+	 */
+	static async addActivity(activity: OrbitActivity, identity: OrbitIdentity): Promise<void> {
+		try {
+			await this.sendRequest(activitiesSlug, "POST", { activity, identity });
+		}
+		catch (error) {
+			console.error(`ORBIT: addActivity: ${error}`);
+		}
+	}
 
-// export async function addActivity(activity: OrbitActivity, identity: OrbitIdentity) {
-//     try {
-//         const response = await fetch(activitiesSlug, {
-//             method: 'POST',
-//             headers,
-//             body: JSON.stringify({
-//                 activity,
-//                 identity
-//             })
-//         });
-//         const data = await response.json();
-//         return data;
-//     }
-//     catch (error) {
-//         console.error(`ORBIT: addActivity: ${error}`);
-//     }
-// }
+	/**
+	 * Adds a content activity to an Orbit member. Creates the member if they don't exist.
+	 * @param url Url of the content created
+	 * @param identity Member identity
+	 */
+	static async addContentActivity(url: string, identity: OrbitIdentity) {
+		try {
+			await this.sendRequest(activitiesSlug, "POST", {
+				activity: {
+					url,
+					activity_type: "content"
+				},
+				identity
+			});
+		}
+		catch (error) {
+			console.error(`ORBIT: addContentActivity: ${error}`);
+		}
+	}
 
-// export type {
-//     OrbitActivity,
-//     OrbitIdentity,
-//     OrbitMember
-// }
+	private static async sendRequest(url: string, method: string, payload?: any) {
+		const response = await fetch(url, {
+			method,
+			headers: orbitHeaders,
+			body: payload ? JSON.stringify(payload) : undefined
+		});
+		const data = await response.json();
+		return data;
+	}
+}
+
