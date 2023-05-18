@@ -1,27 +1,3 @@
-import * as dotenv from 'dotenv';
-dotenv.config();
-
-export const ORBIT_API_KEY = process.env.ORBIT_API_KEY;
-export const ORBIT_WORKSPACE = process.env.ORBIT_WORKSPACE;
-export const ORBIT_BASE_API_URL = 'https://app.orbit.love/api/v1';
-export const GITHUB_WEBHOOK_SECRET = process.env.GH_WEBHOOK_SECRET;
-export const DISCORD_GUILD_ID = process.env.DISCORD_GUILD_ID;
-export const DISCORD_CHANNEL_ID_BREW_WITH_ME =
-  process.env.DISCORD_CHANNEL_ID_BREW_WITH_ME;
-export const DISCORD_TOKEN = process.env.DISCORD_TOKEN;
-export const PIPEDREAM_UPDATE_DISCORD_EVENT_ID_WEBHOOK =
-  process.env.PIPEDREAM_UPDATE_DISCORD_EVENT_ID_WEBHOOK;
-export const PORT = parseInt(process.env.PORT as string);
-export const DISCORD_ROLE_BUILDERS = process.env.DISCORD_ROLE_BUILDERS;
-
-export const membersSlug = `${ORBIT_BASE_API_URL}/${ORBIT_WORKSPACE}/members`;
-export const activitiesSlug = `${ORBIT_BASE_API_URL}/${ORBIT_WORKSPACE}/activities`;
-
-export const orbitHeaders = {
-  'Content-Type': 'application/json',
-  Authorization: `Bearer ${ORBIT_API_KEY}`,
-};
-
 /**
  * Events emitted from EventBus.
  */
@@ -31,8 +7,38 @@ export enum Events {
   GatheringEnd = 'gathering:end',
   ShareableCreated = 'shareable:created',
   PullRequestMerged = 'contributions:pullrequest:merged',
+  OnChatMessage = 'twitch:chat_message',
+  OnCheer = 'twitch:cheer',
+  OnCommand = 'twitch:command',
+  OnCreditRoll = 'twitch:credit_roll',
+  OnFollow = 'twitch:follow',
+  OnJoin = 'twitch:join',
+  OnPart = 'twitch:part',
+  OnPointRedemption = 'twitch:point_redemption',
+  OnSoundEffect = 'twitch:sound_effect',
+  OnStop = 'twitch:stop',
+  OnStreamChange = 'twitch:stream_change',
+  OnStreamEnd = 'twitch:stream_end',
+  OnStreamStart = 'twich:stream_start',
+  OnSub = 'twitch:sub',
+  OnRaid = 'twich:raid',
+  OnSay = 'twitch:say',
+  RequestCreditRoll = 'twich:request_credit_roll',
 }
 
 export enum OrbitActivities {
   BrewWithMe = 'event:discord:brew_with_me',
+}
+
+export enum UserEventType {
+  ChatMessage = 'chatMessage',
+  Cheer = 'cheer',
+  Command = 'command',
+  Follow = 'follow',
+  PointRedemption = 'pointRedemption',
+  SoundEffect = 'soundEffect',
+  Sub = 'sub',
+  Raid = 'raid',
+  Join = 'join',
+  Part = 'part',
 }

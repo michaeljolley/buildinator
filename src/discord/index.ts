@@ -10,21 +10,14 @@ import {
 } from 'discord.js';
 import {titleCase} from 'title-case';
 import {EventBus} from '../events';
-import {
-  DISCORD_CHANNEL_ID_BREW_WITH_ME,
-  DISCORD_GUILD_ID,
-  DISCORD_ROLE_BUILDERS,
-  DISCORD_TOKEN,
-  Events,
-  OrbitActivities,
-  PIPEDREAM_UPDATE_DISCORD_EVENT_ID_WEBHOOK,
-} from '../constants';
+import {Events, OrbitActivities} from '../constants';
 import {GatheringAttendee} from '../types/gatheringAttendee';
 import {GatheringEvent} from '../types/gatheringEvent';
 import {BUILD_WITH_ME_DISCORD_EVENT_COVER_IMAGE} from './BUILD_WITH_ME_DISCORD_EVENT_COVER_IMAGE';
 import {LogArea, LogLevel, log} from '../log';
 import {GitHubPullRequestEvent} from '../types/githubPullRequestEvent';
 import {Orbit} from '../orbit';
+import {BuildinatorConfig} from '../types/buildinatorConfig';
 
 const DISCORD_INTENTS = [
   GatewayIntentBits.Guilds,
@@ -51,11 +44,14 @@ export default abstract class Discord {
   });
 
   private static _attendees: Record<string, GatheringAttendee> = {};
+  private static _config: BuildinatorConfig;
 
   /**
    * Initializes the Discord client and registers event handlers.
    */
-  static async init(): Promise<void> {
+  static async init(config: BuildinatorConfig): Promise<void> {
+    this._config = config;
+
     // Register any EventBus event handlers within this on 'ready' event.
     this._client.on('ready', async () => {
       EventBus.eventEmitter.on(
@@ -71,7 +67,7 @@ export default abstract class Discord {
       await this.joinBrewWithMeChannel();
     });
 
-    await this._client.login(DISCORD_TOKEN);
+    await this._client.login(this._config.DISCORD_TOKEN);
   }
 
   /**
@@ -101,7 +97,10 @@ export default abstract class Discord {
 
     // If the event is a Brew With Me event, and it's completed, we need to
     // review any attendees and possibly assign them the Builders role.
-    if (newGuildScheduledEvent.channelId === DISCORD_CHANNEL_ID_BREW_WITH_ME) {
+    if (
+      newGuildScheduledEvent.channelId ===
+      this._config.DISCORD_CHANNEL_ID_BREW_WITH_ME
+    ) {
       switch (newGuildScheduledEvent.status) {
         case GuildScheduledEventStatus.Active:
           this.startEvent(newGuildScheduledEvent);
@@ -156,10 +155,16 @@ export default abstract class Discord {
         // events are 1 hour long), assign the Builders role.
         if (totalDurationInMinutes >= 30) {
           membersToReview.push(member.nickname || member.user.username);
-          member.roles.add(DISCORD_ROLE_BUILDERS as string);
+          member.roles.add(this._config.DISCORD_ROLE_BUILDERS as string);
 
-          if (!member.roles.cache.has(DISCORD_ROLE_BUILDERS as string)) {
-            await member.roles.add(DISCORD_ROLE_BUILDERS as string);
+          if (
+            !member.roles.cache.has(
+              this._config.DISCORD_ROLE_BUILDERS as string,
+            )
+          ) {
+            await member.roles.add(
+              this._config.DISCORD_ROLE_BUILDERS as string,
+            );
           }
         }
 
@@ -172,7 +177,7 @@ export default abstract class Discord {
               description: `Attended ${newGuildScheduledEvent.name} for ${totalDurationInMinutes} minutes`,
               activity_type: 'buildinator',
               activity_type_key: OrbitActivities.BrewWithMe,
-              link: `https://discord.com/channels/${DISCORD_GUILD_ID}/${DISCORD_CHANNEL_ID_BREW_WITH_ME}`,
+              link: `https://discord.com/channels/${this._config.DISCORD_GUILD_ID}/${this._config.DISCORD_CHANNEL_ID_BREW_WITH_ME}`,
             },
             {
               uid: member.id,
@@ -200,7 +205,7 @@ export default abstract class Discord {
 
     if (guild) {
       const brewWithMeChannel = await guild.channels.fetch(
-        DISCORD_CHANNEL_ID_BREW_WITH_ME as string,
+        this._config.DISCORD_CHANNEL_ID_BREW_WITH_ME,
       );
       if (brewWithMeChannel && brewWithMeChannel.isVoiceBased()) {
         this._client.on(
@@ -226,7 +231,7 @@ export default abstract class Discord {
       const scheduledEvents = await guild.scheduledEvents.fetch();
       const activeEvent = scheduledEvents.find(event => {
         return (
-          event.channelId === DISCORD_CHANNEL_ID_BREW_WITH_ME &&
+          event.channelId === this._config.DISCORD_CHANNEL_ID_BREW_WITH_ME &&
           event.isActive()
         );
       });
@@ -241,7 +246,9 @@ export default abstract class Discord {
           };
 
           // If the newState comes in with a channelId, it's a join event.
-          if (newState.channelId === DISCORD_CHANNEL_ID_BREW_WITH_ME) {
+          if (
+            newState.channelId === this._config.DISCORD_CHANNEL_ID_BREW_WITH_ME
+          ) {
             member.join = new Date();
           }
           // otherwise, it's a leave event
@@ -320,7 +327,7 @@ export default abstract class Discord {
           channel:
             gathering.type === NOTION_EVENT_TYPE_TWITCH
               ? undefined
-              : (DISCORD_CHANNEL_ID_BREW_WITH_ME as string),
+              : (this._config.DISCORD_CHANNEL_ID_BREW_WITH_ME as string),
           entityMetadata: {
             location:
               gathering.type === NOTION_EVENT_TYPE_TWITCH
@@ -337,13 +344,16 @@ export default abstract class Discord {
         );
 
         // Publish new Discord Event Id to Pipedream/Notion
-        await fetch(PIPEDREAM_UPDATE_DISCORD_EVENT_ID_WEBHOOK as string, {
-          method: 'POST',
-          body: JSON.stringify({
-            notionPageId: gathering.id,
-            discordEventId: discordEvent?.id,
-          }),
-        });
+        await fetch(
+          this._config.PIPEDREAM_UPDATE_DISCORD_EVENT_ID_WEBHOOK as string,
+          {
+            method: 'POST',
+            body: JSON.stringify({
+              notionPageId: gathering.id,
+              discordEventId: discordEvent?.id,
+            }),
+          },
+        );
       }
     } catch (error) {
       log(
@@ -426,12 +436,14 @@ export default abstract class Discord {
    */
   static async getGuild(): Promise<Guild | undefined> {
     try {
-      return await this._client.guilds.fetch(DISCORD_GUILD_ID as string);
+      return await this._client.guilds.fetch(
+        this._config.DISCORD_GUILD_ID as string,
+      );
     } catch (error) {
       log(
         LogLevel.Error,
         LogArea.Discord,
-        `Error retrieving Discord guild ${DISCORD_GUILD_ID}\n${error}`,
+        `Error retrieving Discord guild ${this._config.DISCORD_GUILD_ID}\n${error}`,
       );
     }
   }

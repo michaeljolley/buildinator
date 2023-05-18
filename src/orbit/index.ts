@@ -1,18 +1,33 @@
 import querystring from 'querystring';
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 import {OrbitIdentity} from '../types/orbitIdentity';
-import {activitiesSlug, membersSlug, orbitHeaders} from '../constants';
 import {OrbitMember} from '../types/orbitMember';
 import {OrbitActivity} from '../types/orbityActivity';
 import {LogArea, LogLevel, log} from '../log';
 
 export abstract class Orbit {
+  private static ORBIT_API_KEY: string = process.env.ORBIT_API_KEY as string;
+  private static ORBIT_BASE_API_URL = 'https://app.orbit.love/api/v1';
+  private static ORBIT_WORKSPACE: string = process.env
+    .ORBIT_WORKSPACE as string;
+
+  private static membersSlug = `${this.ORBIT_BASE_API_URL}/${this.ORBIT_WORKSPACE}/members`;
+  private static activitiesSlug = `${this.ORBIT_BASE_API_URL}/${this.ORBIT_WORKSPACE}/activities`;
+
+  private static orbitHeaders = {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${this.ORBIT_API_KEY}`,
+  };
+
   /**
    * Adds or updates a member in Orbit
    * @param identity Orbit identity object of a member
    */
   static async addMember(identity: OrbitIdentity): Promise<void> {
     try {
-      await this.sendRequest(membersSlug, 'POST', identity);
+      await this.sendRequest(this.membersSlug, 'POST', identity);
     } catch (error) {
       log(LogLevel.Error, LogArea.Orbit, `ORBIT: addMember: ${error}`);
     }
@@ -29,7 +44,7 @@ export abstract class Orbit {
     try {
       const queryParams = querystring.stringify(identity);
       return await this.sendRequest(
-        `${membersSlug}/find?${queryParams}`,
+        `${this.membersSlug}/find?${queryParams}`,
         'GET',
       );
     } catch (error) {
@@ -47,7 +62,7 @@ export abstract class Orbit {
     identity: OrbitIdentity,
   ): Promise<void> {
     try {
-      await this.sendRequest(activitiesSlug, 'POST', {activity, identity});
+      await this.sendRequest(this.activitiesSlug, 'POST', {activity, identity});
     } catch (error) {
       log(LogLevel.Error, LogArea.Orbit, `ORBIT: addActivity: ${error}`);
     }
@@ -60,7 +75,7 @@ export abstract class Orbit {
    */
   static async addContentActivity(url: string, identity: OrbitIdentity) {
     try {
-      await this.sendRequest(activitiesSlug, 'POST', {
+      await this.sendRequest(this.activitiesSlug, 'POST', {
         activity: {
           url,
           activity_type: 'content',
@@ -76,7 +91,7 @@ export abstract class Orbit {
   private static async sendRequest(url: string, method: string, payload?: any) {
     const response = await fetch(url, {
       method,
-      headers: orbitHeaders,
+      headers: this.orbitHeaders,
       body: payload ? JSON.stringify(payload) : undefined,
     });
 

@@ -5,8 +5,12 @@ export enum LogLevel {
 
 export enum LogArea {
   Discord = 'discord',
-  Webhooks = 'webhooks',
+  WWW = 'www',
   Orbit = 'orbit',
+  TwitchAPI = 'twitch_api',
+  Twitch = 'twitch',
+  SocketIOHub = 'socket_io_hub',
+  Init = 'init',
 }
 
 const getTime = (): {hours: string; minutes: string} => {
