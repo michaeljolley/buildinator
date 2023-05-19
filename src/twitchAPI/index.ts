@@ -1,7 +1,7 @@
-import {Cache, CacheType} from '../cache';
-import {LogArea, LogLevel, log} from '../log';
-import {BuildinatorConfig} from '../types/buildinatorConfig';
-import {User} from '../types/user';
+import { Cache, CacheType } from '../cache';
+import { LogArea, LogLevel, log } from '../log';
+import { BuildinatorConfig } from '../types/buildinatorConfig';
+import { User } from '../types/user';
 import API from './api';
 
 export default abstract class TwitchAPI {

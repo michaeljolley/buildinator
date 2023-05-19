@@ -1,30 +1,30 @@
-import {Server as IOServer, Socket} from 'socket.io';
-import {WebSocket, MessageEvent} from 'ws';
-import {Server as HttpServer} from 'http';
+import { Server as IOServer, Socket } from 'socket.io';
+import { WebSocket, MessageEvent } from 'ws';
+import { Server as HttpServer } from 'http';
 
-import {EventBus} from '../events';
-import {Events} from '../constants';
-import {log, LogLevel, LogArea} from '../log';
-import {BuildinatorConfig} from '../types/buildinatorConfig';
-import {OnChatMessageEvent} from '../types/events/onChatMessageEvent';
-import {OnCommandEvent} from '../types/events/onCommandEvent';
-import {OnSoundEffectEvent} from '../types/events/onSoundEffectEvent';
-import {OnCheerEvent} from '../types/events/onCheerEvent';
-import {OnFollowEvent} from '../types/events/onFollowEvent';
-import {OnJoinEvent} from '../types/events/onJoinEvent';
-import {OnPartEvent} from '../types/events/onPartEvent';
-import {OnPointRedemptionEvent} from '../types/events/onPointRedemptionEvent';
-import {OnStopEvent} from '../types/events/onStopEvent';
-import {OnSubEvent} from '../types/events/onSubEvent';
-import {OnRaidEvent} from '../types/events/onRaidEvent';
-import {OnCreditRollEvent} from '../types/events/onCreditRollEvent';
-import {TwitchWebSocketPayloadSession} from '../types/twitchWebSocketPayloadSession';
-import {TwitchWebSocketMessage} from '../types/twitchWebSocketMessage';
-import {TwitchFollowEvent} from '../types/twitchFollowEvent';
+import { EventBus } from '../events';
+import { Events } from '../constants';
+import { log, LogLevel, LogArea } from '../log';
+import { BuildinatorConfig } from '../types/buildinatorConfig';
+import { OnChatMessageEvent } from '../types/events/onChatMessageEvent';
+import { OnCommandEvent } from '../types/events/onCommandEvent';
+import { OnSoundEffectEvent } from '../types/events/onSoundEffectEvent';
+import { OnCheerEvent } from '../types/events/onCheerEvent';
+import { OnFollowEvent } from '../types/events/onFollowEvent';
+import { OnJoinEvent } from '../types/events/onJoinEvent';
+import { OnPartEvent } from '../types/events/onPartEvent';
+import { OnPointRedemptionEvent } from '../types/events/onPointRedemptionEvent';
+import { OnStopEvent } from '../types/events/onStopEvent';
+import { OnSubEvent } from '../types/events/onSubEvent';
+import { OnRaidEvent } from '../types/events/onRaidEvent';
+import { OnCreditRollEvent } from '../types/events/onCreditRollEvent';
+import { TwitchWebSocketPayloadSession } from '../types/twitchWebSocketPayloadSession';
+import { TwitchWebSocketMessage } from '../types/twitchWebSocketMessage';
+import { TwitchFollowEvent } from '../types/twitchFollowEvent';
 import TwitchAPI from '../twitchAPI';
-import {User} from '../types/user';
-import {UserEvent} from '../types/userEvent';
-import {OnStreamEvent} from '../types/events/onStreamEvent';
+import { User } from '../types/user';
+import { UserEvent } from '../types/userEvent';
+import { OnStreamEvent } from '../types/events/onStreamEvent';
 
 export class WebSockets {
   private io: IOServer;
@@ -38,7 +38,7 @@ export class WebSockets {
       // and external actor.
       if (conn.handshake.headers.host !== config.WWW_HOST) {
         log(
-          LogLevel.Info,
+          LogLevel.Error,
           LogArea.SocketIOHub,
           `WS disconnected as not an approved host ${conn.handshake.headers.host} : ${config.WWW_HOST}`,
         );
@@ -118,11 +118,6 @@ export class WebSockets {
   }
 
   private async clientMessage(message: TwitchWebSocketMessage) {
-    log(
-      LogLevel.Info,
-      LogArea.SocketIOHub,
-      `Twitch WS message received: ${message.metadata.message_type}`,
-    );
     switch (message.metadata.message_type) {
       case 'session_welcome':
       case 'session_reconnect':

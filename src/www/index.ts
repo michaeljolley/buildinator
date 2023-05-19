@@ -1,10 +1,7 @@
 import Express from 'express';
-import http from 'http';
-import {LogArea, LogLevel, log} from '../log';
-import {BuildinatorConfig} from '../types/buildinatorConfig';
-import {webhooksRouter} from './webhooks';
-import {overlayRouter} from './overlays';
-import {WebSockets} from '../websockets';
+import { BuildinatorConfig } from '../types/buildinatorConfig';
+import { webhooksRouter } from './webhooks';
+import { overlayRouter } from './overlays';
 
 /**
  * The WWW class is static for the entire application. It is responsible
@@ -13,24 +10,12 @@ import {WebSockets} from '../websockets';
 export default abstract class WWW {
   private static _config: BuildinatorConfig;
 
-  public static init(config: BuildinatorConfig): void {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static init(app: any, config: BuildinatorConfig): void {
     this._config = config;
 
-    const app = Express();
-    const server = http.createServer(app);
-    new WebSockets(server, config);
-
     app.use(Express.json());
-
     app.use('/overlays', overlayRouter);
     app.use('/webhooks', webhooksRouter(this._config));
-
-    app.listen(this._config.WWW_PORT, () =>
-      log(
-        LogLevel.Info,
-        LogArea.WWW,
-        `WWW server is listening on port ${this._config.WWW_PORT}`,
-      ),
-    );
   }
 }
