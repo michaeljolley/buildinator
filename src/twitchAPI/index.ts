@@ -1,19 +1,19 @@
-import {Cache, CacheType} from '../cache';
-import {Events} from '../constants';
-import {EventBus} from '../events';
-import {LogArea, LogLevel, log} from '../log';
-import {BuildinatorConfig} from '../types/buildinatorConfig';
-import {OnFollowEvent} from '../types/events/onFollowEvent';
-import {OnStreamEvent} from '../types/events/onStreamEvent';
-import {Stream} from '../types/stream';
-import {TwitchFollowEvent} from '../types/twitchFollowEvent';
-import {TwitchStreamEvent} from '../types/twitchStreamEvent';
-import {TwitchWebSocketMessage} from '../types/twitchWebSocketMessage';
-import {TwitchWebSocketPayloadSession} from '../types/twitchWebSocketPayloadSession';
-import {User} from '../types/user';
-import {UserEvent} from '../types/userEvent';
+import { Cache, CacheType } from '../cache';
+import { Events } from '../constants';
+import { EventBus } from '../events';
+import { LogArea, LogLevel, log } from '../log';
+import { BuildinatorConfig } from '../types/buildinatorConfig';
+import { OnFollowEvent } from '../types/events/onFollowEvent';
+import { OnStreamEvent } from '../types/events/onStreamEvent';
+import { Stream } from '../types/stream';
+import { TwitchFollowEvent } from '../types/twitchFollowEvent';
+import { TwitchStreamEvent } from '../types/twitchStreamEvent';
+import { TwitchWebSocketMessage } from '../types/twitchWebSocketMessage';
+import { TwitchWebSocketPayloadSession } from '../types/twitchWebSocketPayloadSession';
+import { User } from '../types/user';
+import { UserEvent } from '../types/userEvent';
 import API from './api';
-import {WebSocket, MessageEvent} from 'ws';
+import { WebSocket, MessageEvent } from 'ws';
 
 export default abstract class TwitchAPI {
   private static _config: BuildinatorConfig;
@@ -108,7 +108,7 @@ export default abstract class TwitchAPI {
     const streamDate = new Date().toLocaleDateString('en-US');
     const stream = await TwitchAPI.getStream(streamDate);
     log(LogLevel.Info, LogArea.TwitchAPI, `WS Stream Offline: ${streamDate}`);
-    this.emit(Events.OnStreamEnd, {stream} as OnStreamEvent);
+    this.emit(Events.OnStreamEnd, { stream } as OnStreamEvent);
   }
 
   private static async clientHandleStreamOnline(
@@ -129,7 +129,7 @@ export default abstract class TwitchAPI {
         );
       }
       log(LogLevel.Info, LogArea.TwitchAPI, `WS Stream Online: ${streamDate}`);
-      this.emit(Events.OnStreamStart, {stream} as OnStreamEvent);
+      this.emit(Events.OnStreamStart, { stream } as OnStreamEvent);
     }
   }
 
@@ -198,6 +198,7 @@ export default abstract class TwitchAPI {
       if (apiUser) {
         apiUser.lastUpdated = new Date();
         Cache.set(CacheType.User, apiUser);
+        user = apiUser;
       }
     }
 
