@@ -26,6 +26,7 @@
     "discord.js": "^14.11.0",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
+    "node-sass-middleware": "^1.0.1",
     "sanitize-html": "^2.10.0",
     "socket.io": "^4.6.1",
     "title-case": "^3.0.3"
@@ -40,7 +41,6 @@
     "copyfiles": "^2.4.1",
     "eslint": "^8.40.0",
     "eslint-config-prettier": "^8.8.0",
-    "node-sass-middleware": "^1.0.1",
     "prettier": "^2.8.8",
     "typescript": "^5.0.4"
   }
