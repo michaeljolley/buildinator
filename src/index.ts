@@ -3,17 +3,17 @@ dotenv.config();
 
 import express from 'express';
 import http from 'http';
-import axios, {AxiosResponse} from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import qs from 'querystring';
 
 import Discord from './discord';
 import TwitchChat from './twitchChat';
 import WWW from './www';
-import {BuildinatorConfig} from './types/buildinatorConfig';
-import {TwitchTokenResponse} from './types/twitchTokenResponse';
-import {LogArea, LogLevel, log} from './log';
+import { BuildinatorConfig } from './types/buildinatorConfig';
+import { TwitchTokenResponse } from './types/twitchTokenResponse';
+import { LogArea, LogLevel, log } from './log';
 import TwitchAPI from './twitchAPI';
-import {WebSockets} from './websockets';
+import { WebSockets } from './websockets';
 
 // Identify the Twitch credentials first
 const TwitchClientId = process.env.TWITCH_CLIENT_ID;
@@ -27,10 +27,7 @@ const authParams = qs.stringify({
 
 axios
   .post(`https://id.twitch.tv/oauth2/token?${authParams}`)
-  .then(init)
-  .catch((reason: unknown) =>
-    log(LogLevel.Error, LogArea.Init, `Twitch OAuth booboo: ${reason}`),
-  );
+  .then(init);
 
 async function init(response: AxiosResponse<TwitchTokenResponse>) {
   const twitchAuth = response.data;
