@@ -1,8 +1,8 @@
-import axios, { AxiosResponse } from 'axios';
-import { BuildinatorConfig } from '../types/buildinatorConfig';
-import { LogArea, LogLevel, log } from '../log';
-import { User } from '../types/user';
-import { Stream } from '../types/stream';
+import axios, {AxiosResponse} from 'axios';
+import {BuildinatorConfig} from '../types/buildinatorConfig';
+import {LogArea, LogLevel, log} from '../log';
+import {User} from '../types/user';
+import {Stream} from '../types/stream';
 
 export default class API {
   private twitchAPIEndpoint = 'https://api.twitch.tv/helix';
@@ -30,8 +30,8 @@ export default class API {
     this.headersNoScope = {
       Authorization: `Bearer ${this._config.TWITCH_BOT_AUTH_TOKEN_NO_SCOPE}`,
       'Content-Type': 'application/json',
-      'Client-ID': this._config.TWITCH_CLIENT_ID
-    }
+      'Client-ID': this._config.TWITCH_CLIENT_ID,
+    };
   }
 
   /**
@@ -94,8 +94,8 @@ export default class API {
       const payload = {
         type: 'stream.online',
         version: '1',
-        condition: { broadcaster_user_id: `${this._config.TWITCH_CHANNEL_ID}` },
-        transport: { method: 'websocket', session_id: sessionId },
+        condition: {broadcaster_user_id: `${this._config.TWITCH_CHANNEL_ID}`},
+        transport: {method: 'websocket', session_id: sessionId},
       };
 
       const response = await axios.post(
@@ -126,8 +126,8 @@ export default class API {
       const payload = {
         type: 'stream.offline',
         version: '1',
-        condition: { broadcaster_user_id: `${this._config.TWITCH_CHANNEL_ID}` },
-        transport: { method: 'websocket', session_id: sessionId },
+        condition: {broadcaster_user_id: `${this._config.TWITCH_CHANNEL_ID}`},
+        transport: {method: 'websocket', session_id: sessionId},
       };
 
       const response = await axios.post(
@@ -156,8 +156,9 @@ export default class API {
    * @param id id or username of the user to retrieve
    */
   public async getUser(id: number | string): Promise<User | undefined> {
-    const url = `${this.twitchAPIUserEndpoint}?${Number.isInteger(id) ? 'id=' : 'login='
-      }${id}`;
+    const url = `${this.twitchAPIUserEndpoint}?${
+      Number.isInteger(id) ? 'id=' : 'login='
+    }${id}`;
 
     let user: User | undefined = undefined;
 

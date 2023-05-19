@@ -1,19 +1,19 @@
 import * as dotenv from 'dotenv';
 dotenv.config();
 
-import express from 'express'
-import http from 'http'
-import axios, { AxiosResponse } from 'axios';
+import express from 'express';
+import http from 'http';
+import axios, {AxiosResponse} from 'axios';
 import qs from 'querystring';
 
 import Discord from './discord';
 import TwitchChat from './twitchChat';
 import WWW from './www';
-import { BuildinatorConfig } from './types/buildinatorConfig';
-import { TwitchTokenResponse } from './types/twitchTokenResponse';
-import { LogArea, LogLevel, log } from './log';
+import {BuildinatorConfig} from './types/buildinatorConfig';
+import {TwitchTokenResponse} from './types/twitchTokenResponse';
+import {LogArea, LogLevel, log} from './log';
 import TwitchAPI from './twitchAPI';
-import { WebSockets } from './websockets';
+import {WebSockets} from './websockets';
 
 // Identify the Twitch credentials first
 const TwitchClientId = process.env.TWITCH_CLIENT_ID;
@@ -25,9 +25,12 @@ const authParams = qs.stringify({
   grant_type: 'client_credentials',
 });
 
-axios.post(`https://id.twitch.tv/oauth2/token?${authParams}`)
+axios
+  .post(`https://id.twitch.tv/oauth2/token?${authParams}`)
   .then(init)
-  .catch((reason: unknown) => log(LogLevel.Error, LogArea.Init, `Twitch OAuth booboo: ${reason}`))
+  .catch((reason: unknown) =>
+    log(LogLevel.Error, LogArea.Init, `Twitch OAuth booboo: ${reason}`),
+  );
 
 async function init(response: AxiosResponse<TwitchTokenResponse>) {
   const twitchAuth = response.data;
@@ -46,7 +49,8 @@ async function init(response: AxiosResponse<TwitchTokenResponse>) {
     WWW_HOST: process.env.WWW_HOST as string,
     DISCORD_ROLE_BUILDERS: process.env.DISCORD_ROLE_BUILDERS as string,
     TWITCH_BOT_AUTH_TOKEN: process.env.TWITCH_BOT_AUTH_TOKEN as string,
-    TWITCH_BOT_AUTH_TOKEN_NO_SCOPE: process.env.TWITCH_BOT_AUTH_TOKEN_NO_SCOPE as string,
+    TWITCH_BOT_AUTH_TOKEN_NO_SCOPE: process.env
+      .TWITCH_BOT_AUTH_TOKEN_NO_SCOPE as string,
     TWITCH_BOT_USERNAME: process.env.TWITCH_BOT_USERNAME as string,
     TWITCH_CHANNEL_NAME: process.env.TWITCH_CHANNEL_NAME as string,
     TWITCH_CHANNEL_AUTH_TOKEN: twitchAuth.access_token,
@@ -55,15 +59,13 @@ async function init(response: AxiosResponse<TwitchTokenResponse>) {
     TWITCH_BOT_CHANNEL_ID: process.env.TWITCH_BOT_CHANNEL_ID as string,
   };
 
-  TwitchAPI.init(config);
+  const app = express();
+  const server = http.createServer(app);
 
-  const app = express()
-  const server = http.createServer(app)
-
-  WWW.init(app, config);
   new WebSockets(server, config);
+  WWW(app, config);
 
-  app.listen(config.WWW_PORT, () =>
+  server.listen(config.WWW_PORT, () =>
     log(
       LogLevel.Info,
       LogArea.WWW,
@@ -71,13 +73,14 @@ async function init(response: AxiosResponse<TwitchTokenResponse>) {
     ),
   );
 
+  TwitchAPI.init(config);
   TwitchChat.init(config);
   Discord.init(config);
 
   // close all streams and clean up anything needed for the stream
   // when the process is stopping
-  process.on("SIGTERM", () => {
-    log(LogLevel.Info, LogArea.Init, "Shutting down...")
-    server.close()
-  })
+  process.on('SIGTERM', () => {
+    log(LogLevel.Info, LogArea.Init, 'Shutting down...');
+    server.close();
+  });
 }

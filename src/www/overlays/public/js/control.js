@@ -10,7 +10,7 @@ const app = new Vue({
   },
   methods: {
     rollCredits() {
-      this.socket.emit('requestCreditRoll', this.streamDate)
+      this.socket.emit('twich:request_credit_roll', this.streamDate)
     }
   },
   mounted() {

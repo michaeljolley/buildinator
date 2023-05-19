@@ -59,7 +59,7 @@ const app = new Vue({
   created() {
     this.socket = io.connect('/');
 
-    this.socket.on('onChatMessage', onChatMessageEvent => {
+    this.socket.on('twitch:chat_message', onChatMessageEvent => {
       this.addMessage(onChatMessageEvent);
     });
 
@@ -67,7 +67,7 @@ const app = new Vue({
       window.location.reload();
     });
 
-    console.log("We're loaded and listening to 'onChatMessage' from socket.io");
+    console.log("We're loaded and listening to 'twitch:chat_message' from socket.io");
   },
   template: `<div class="chat" v-bind:class="{ fade: hasHighlight }">
               <transition-group name="list" @after-leave="checkOverflow">

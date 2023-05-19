@@ -96,34 +96,34 @@ const app = new Vue({
       let audio;
 
       switch (nextAlert.type) {
-        case 'onSoundEffect':
+        case 'twitch:sound_effect':
           audio = this.clipsAudioSrc(nextAlert.data.filename);
           break;
-        case 'onFollow':
+        case 'twitch:follow':
           line1 = 'New';
           line2 = name;
           line3 = 'Follower';
           audio = this.alertsAudioSrc('ohmy');
           break;
-        case 'onSub':
+        case 'twitch:sub':
           line1 = 'Thanks';
           line2 = name;
           line3 = 'for the sub';
           audio = this.alertsAudioSrc('hair');
           break;
-        case 'onRaid':
+        case 'twich:raid':
           line1 = 'Raid';
           line2 = name;
           line3 = 'Alert';
           audio = this.alertsAudioSrc('goodbadugly');
           break;
-        case 'onCheer':
+        case 'twitch:cheer':
           line1 = ' ';
           line2 = name;
           line3 = `cheered  ${nextAlert.data.bits} bits!`;
           audio = this.alertsAudioSrc('cheer');
           break;
-        case 'onDonation':
+        case 'twitch:donation':
           line1 = 'Donation Alert!';
           line2 = name;
           line3 = `gave  $${nextAlert.data.amount}`;
@@ -166,11 +166,11 @@ const app = new Vue({
     const audio = document.createElement('audio');
     audio.addEventListener('ended', this.clearAudio, false);
 
-    this.socket.on('onSoundEffect', onSoundEffectEvent => {
-      this.addAlert('onSoundEffect', onSoundEffectEvent);
+    this.socket.on('twitch:sound_effect', onSoundEffectEvent => {
+      this.addAlert('twitch:sound_effect', onSoundEffectEvent);
     });
 
-    this.socket.on('onStop', onStopEvent => {
+    this.socket.on('twitch:stop', onStopEvent => {
       this.stopAudio();
     });
 
@@ -178,20 +178,20 @@ const app = new Vue({
       this.addAlert('onFollow', onFollowEvent);
     });
 
-    this.socket.on('onSub', onSubEvent => {
-      this.addAlert('onSub', onSubEvent);
+    this.socket.on('twitch:sub', onSubEvent => {
+      this.addAlert('twitch:sub', onSubEvent);
     });
 
-    this.socket.on('onRaid', onRaidEvent => {
-      this.addAlert('onRaid', onRaidEvent);
+    this.socket.on('twich:raid', onRaidEvent => {
+      this.addAlert('twich:raid', onRaidEvent);
     });
 
-    this.socket.on('onCheer', onCheerEvent => {
-      this.addAlert('onCheer', onCheerEvent);
+    this.socket.on('twitch:cheer', onCheerEvent => {
+      this.addAlert('twitch:cheer', onCheerEvent);
     });
 
-    this.socket.on('onDonation', onDonationEvent => {
-      this.addAlert('onDonation', onDonationEvent);
+    this.socket.on('twitch:donation', onDonationEvent => {
+      this.addAlert('twitch:donation', onDonationEvent);
     });
 
     this.socket.on('reconnect', () => {

@@ -23,6 +23,7 @@ export enum Events {
   OnSub = 'twitch:sub',
   OnRaid = 'twich:raid',
   OnSay = 'twitch:say',
+  OnDonation = 'twitch:donation',
   RequestCreditRoll = 'twich:request_credit_roll',
 }
 
@@ -31,12 +32,12 @@ export enum OrbitActivities {
 }
 
 export enum UserEventType {
-  ChatMessage = 'chatMessage',
+  ChatMessage = 'chat_message',
   Cheer = 'cheer',
   Command = 'command',
   Follow = 'follow',
-  PointRedemption = 'pointRedemption',
-  SoundEffect = 'soundEffect',
+  PointRedemption = 'point_redemption',
+  SoundEffect = 'sound_effect',
   Sub = 'sub',
   Raid = 'raid',
   Join = 'join',

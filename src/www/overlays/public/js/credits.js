@@ -196,7 +196,7 @@ const app = new Vue({
   created() {
     this.socket = io.connect('/');
 
-    this.socket.on('onCreditRoll', onCreditRollEvent => {
+    this.socket.on('twich:request_credit_roll', onCreditRollEvent => {
       this.processCredits(onCreditRollEvent);
     });
 
