@@ -1,4 +1,3 @@
-import axios, { AxiosResponse } from 'axios';
 import { BuildinatorConfig } from '../types/buildinatorConfig';
 import { LogArea, LogLevel, log } from '../log';
 import { User } from '../types/user';
@@ -12,28 +11,28 @@ export default class API {
   private twitchAPIWebhookEndpoint = `${this.twitchAPIEndpoint}/eventsub/subscriptions`;
   private twitchAPIScheduleEndpoint = `${this.twitchAPIEndpoint}/schedule/segment`;
 
-  private headers: Record<string, string | number | boolean>;
-  private wsHeaders: Record<string, string | number | boolean>;
-  private headersNoScope: Record<string, string | number | boolean>;
+  private headers: Headers;
+  private wsHeaders: Headers;
+  private headersNoScope: Headers;
   private _config: BuildinatorConfig;
 
   constructor(config: BuildinatorConfig) {
     this._config = config;
-    this.headers = {
-      Authorization: `Bearer ${this._config.TWITCH_CHANNEL_AUTH_TOKEN}`,
-      'Content-Type': 'application/json',
-      'Client-ID': this._config.TWITCH_CLIENT_ID,
-    };
-    this.wsHeaders = {
-      Authorization: `Bearer ${this._config.TWITCH_BOT_AUTH_TOKEN}`,
-      'Content-Type': 'application/json',
-      'Client-ID': this._config.TWITCH_CLIENT_ID,
-    };
-    this.headersNoScope = {
-      Authorization: `Bearer ${this._config.TWITCH_BOT_AUTH_TOKEN_NO_SCOPE}`,
-      'Content-Type': 'application/json',
-      'Client-ID': this._config.TWITCH_CLIENT_ID,
-    };
+    this.headers = new Headers([
+      ["Authorization", `Bearer ${this._config.TWITCH_CHANNEL_AUTH_TOKEN}`],
+      ['Content-Type', 'application/json'],
+      ['Client-ID', this._config.TWITCH_CLIENT_ID]
+    ]);
+    this.wsHeaders = new Headers([
+      ["Authorization", `Bearer ${this._config.TWITCH_BOT_AUTH_TOKEN}`],
+      ['Content-Type', 'application/json'],
+      ['Client-ID', this._config.TWITCH_CLIENT_ID]
+    ]);
+    this.headersNoScope = new Headers([
+      ["Authorization", `Bearer ${this._config.TWITCH_BOT_AUTH_TOKEN_NO_SCOPE}`],
+      ['Content-Type', 'application/json'],
+      ['Client-ID', this._config.TWITCH_CLIENT_ID]
+    ]);
   }
 
   /**
@@ -68,13 +67,11 @@ export default class API {
         },
       };
 
-      const response = await axios.post(
-        this.twitchAPIWebhookEndpoint,
-        payload,
-        {
-          headers: this.wsHeaders,
-        },
-      );
+      const response = await fetch(this.twitchAPIWebhookEndpoint, {
+        method: 'POST',
+        headers: this.wsHeaders,
+        body: JSON.stringify(payload),
+      });
       log(
         LogLevel.Info,
         LogArea.TwitchAPI,
@@ -100,13 +97,11 @@ export default class API {
         transport: { method: 'websocket', session_id: sessionId },
       };
 
-      const response = await axios.post(
-        this.twitchAPIWebhookEndpoint,
-        payload,
-        {
-          headers: this.headersNoScope,
-        },
-      );
+      const response = await fetch(this.twitchAPIWebhookEndpoint, {
+        method: 'POST',
+        headers: this.headersNoScope,
+        body: JSON.stringify(payload),
+      });
       log(
         LogLevel.Info,
         LogArea.TwitchAPI,
@@ -132,13 +127,11 @@ export default class API {
         transport: { method: 'websocket', session_id: sessionId },
       };
 
-      const response = await axios.post(
-        this.twitchAPIWebhookEndpoint,
-        payload,
-        {
-          headers: this.headersNoScope,
-        },
-      );
+      const response = await fetch(this.twitchAPIWebhookEndpoint, {
+        method: 'POST',
+        headers: this.headersNoScope,
+        body: JSON.stringify(payload),
+      });
       log(
         LogLevel.Info,
         LogArea.TwitchAPI,
@@ -164,11 +157,12 @@ export default class API {
     let user: User | undefined = undefined;
 
     try {
-      const response: AxiosResponse = await axios.get(url, {
+      const response = await fetch(url, {
+        method: 'GET',
         headers: this.headers,
       });
-      if (response.data) {
-        const body = response.data;
+      const body = await response.json();
+      if (body) {
         const userData = body.data.length > 1 ? body.data : body.data[0];
         if (userData) {
           user = {
@@ -192,11 +186,12 @@ export default class API {
     let stream: Stream | undefined;
 
     try {
-      const response: AxiosResponse = await axios.get(url, {
+      const response = await fetch(url, {
+        method: 'GET',
         headers: this.headers,
       });
-      if (response.data) {
-        const body = response.data;
+      const body = await response.json();
+      if (body) {
         const streamData = body.data.length > 1 ? body.data : body.data[0];
         if (streamData) {
           stream = {
@@ -228,11 +223,13 @@ export default class API {
     }
 
     try {
-      const response: AxiosResponse = await axios.post(url, body, {
-        headers: this.headers
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: this.headers,
+        body: JSON.stringify(body)
       });
-      if (response.data) {
-        const data = response.data;
+      const { data } = await response.json();
+      if (data) {
         if (data.segments && data.segments.length > 0) {
           scheduledSegmentId = data.segments[0].id;
 
@@ -277,11 +274,13 @@ export default class API {
     }
 
     try {
-      const response: AxiosResponse = await axios.patch(url, body, {
-        headers: this.headers
+      const response = await fetch(url, {
+        method: 'PATCH',
+        headers: this.headers,
+        body: JSON.stringify(body)
       });
-      if (response.data) {
-        const data = response.data;
+      const { data } = await response.json();
+      if (data) {
         if (data.segments && data.segments.length > 0) {
           scheduledSegmentId = data.segments[0].id;
         }
