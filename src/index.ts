@@ -42,6 +42,8 @@ async function init(response: AxiosResponse<TwitchTokenResponse>) {
     DISCORD_TOKEN: process.env.DISCORD_TOKEN as string,
     PIPEDREAM_UPDATE_DISCORD_EVENT_ID_WEBHOOK: process.env
       .PIPEDREAM_UPDATE_DISCORD_EVENT_ID_WEBHOOK as string,
+    PIPEDREAM_UPDATE_TWITCH_EVENT_ID_WEBHOOK: process.env
+      .PIPEDREAM_UPDATE_TWITCH_EVENT_ID_WEBHOOK as string,
     WWW_PORT: parseInt(process.env.WWW_PORT as string),
     WWW_HOST: process.env.WWW_HOST as string,
     DISCORD_ROLE_BUILDERS: process.env.DISCORD_ROLE_BUILDERS as string,

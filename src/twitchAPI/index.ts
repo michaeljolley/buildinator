@@ -1,10 +1,11 @@
 import { Cache, CacheType } from '../cache';
-import { Events } from '../constants';
+import { Events, NOTION_EVENT_TYPE_TWITCH } from '../constants';
 import { EventBus } from '../events';
 import { LogArea, LogLevel, log } from '../log';
 import { BuildinatorConfig } from '../types/buildinatorConfig';
 import { OnFollowEvent } from '../types/events/onFollowEvent';
 import { OnStreamEvent } from '../types/events/onStreamEvent';
+import { GatheringEvent } from '../types/gatheringEvent';
 import { Stream } from '../types/stream';
 import { TwitchFollowEvent } from '../types/twitchFollowEvent';
 import { TwitchStreamEvent } from '../types/twitchStreamEvent';
@@ -21,6 +22,11 @@ export default abstract class TwitchAPI {
 
   static init(config: BuildinatorConfig) {
     this._config = config;
+
+    EventBus.eventEmitter.on(
+      Events.GatheringScheduled,
+      this.gatheringScheduledHandler.bind(this),
+    );
 
     this.client = new WebSocket('wss://eventsub-beta.wss.twitch.tv/ws');
 
@@ -203,6 +209,29 @@ export default abstract class TwitchAPI {
     }
 
     return user;
+  }
+
+  /**
+   * Creates/updates/deletes Twitch scheduled events based on events
+   * saved in Notion.
+   * @param gathering A community event from Notion
+   */
+  static async gatheringScheduledHandler(gathering: GatheringEvent) {
+    // If the event type is a stream , then we need
+    // to create or update a Twitch scheduled segment.
+    if (
+      gathering.type === NOTION_EVENT_TYPE_TWITCH
+    ) {
+      if (gathering.releaseDateStart) {
+        const twitchAPI = new API(this._config);
+        // If the Notion event has a `twitchEventId`, we've already created
+        // it in Twitch. In that event, we need to update/delete the event
+        // in Twitch.
+        gathering.twitchEventId === null
+          ? await twitchAPI.createScheduledStream(gathering)
+          : await twitchAPI.updateScheduledStream(gathering);
+      }
+    }
   }
 
   private static emit(

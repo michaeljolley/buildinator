@@ -8,16 +8,16 @@ import {
   GuildScheduledEventStatus,
   VoiceState,
 } from 'discord.js';
-import {titleCase} from 'title-case';
-import {EventBus} from '../events';
-import {Events, OrbitActivities} from '../constants';
-import {GatheringAttendee} from '../types/gatheringAttendee';
-import {GatheringEvent} from '../types/gatheringEvent';
-import {BUILD_WITH_ME_DISCORD_EVENT_COVER_IMAGE} from './BUILD_WITH_ME_DISCORD_EVENT_COVER_IMAGE';
-import {LogArea, LogLevel, log} from '../log';
-import {GitHubPullRequestEvent} from '../types/githubPullRequestEvent';
-import {Orbit} from '../orbit';
-import {BuildinatorConfig} from '../types/buildinatorConfig';
+import { titleCase } from 'title-case';
+import { EventBus } from '../events';
+import { Events, NOTION_EVENT_TYPE_BREW_WITH_ME, NOTION_EVENT_TYPE_TWITCH, OrbitActivities } from '../constants';
+import { GatheringAttendee } from '../types/gatheringAttendee';
+import { GatheringEvent } from '../types/gatheringEvent';
+import { BUILD_WITH_ME_DISCORD_EVENT_COVER_IMAGE } from './BUILD_WITH_ME_DISCORD_EVENT_COVER_IMAGE';
+import { LogArea, LogLevel, log } from '../log';
+import { GitHubPullRequestEvent } from '../types/githubPullRequestEvent';
+import { Orbit } from '../orbit';
+import { BuildinatorConfig } from '../types/buildinatorConfig';
 
 const DISCORD_INTENTS = [
   GatewayIntentBits.Guilds,
@@ -29,9 +29,6 @@ const DISCORD_INTENTS = [
   GatewayIntentBits.GuildVoiceStates,
   GatewayIntentBits.GuildScheduledEvents,
 ];
-
-const NOTION_EVENT_TYPE_TWITCH = 'Twitch';
-const NOTION_EVENT_TYPE_BREW_WITH_ME = 'Brew With Me';
 
 /**
  * The Discord class is static for the entire application. It is responsible for

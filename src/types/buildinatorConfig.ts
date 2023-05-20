@@ -6,6 +6,7 @@ export type BuildinatorConfig = {
   DISCORD_CHANNEL_ID_BREW_WITH_ME: string;
   DISCORD_TOKEN: string;
   PIPEDREAM_UPDATE_DISCORD_EVENT_ID_WEBHOOK: string;
+  PIPEDREAM_UPDATE_TWITCH_EVENT_ID_WEBHOOK: string;
   WWW_PORT: number;
   WWW_HOST: string;
   DISCORD_ROLE_BUILDERS: string;

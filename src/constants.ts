@@ -43,3 +43,6 @@ export enum UserEventType {
   Join = 'join',
   Part = 'part',
 }
+
+export const NOTION_EVENT_TYPE_TWITCH = 'Twitch';
+export const NOTION_EVENT_TYPE_BREW_WITH_ME = 'Brew With Me';

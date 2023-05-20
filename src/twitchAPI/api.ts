@@ -1,14 +1,16 @@
-import axios, {AxiosResponse} from 'axios';
-import {BuildinatorConfig} from '../types/buildinatorConfig';
-import {LogArea, LogLevel, log} from '../log';
-import {User} from '../types/user';
-import {Stream} from '../types/stream';
+import axios, { AxiosResponse } from 'axios';
+import { BuildinatorConfig } from '../types/buildinatorConfig';
+import { LogArea, LogLevel, log } from '../log';
+import { User } from '../types/user';
+import { Stream } from '../types/stream';
+import { GatheringEvent } from '../types/gatheringEvent';
 
 export default class API {
   private twitchAPIEndpoint = 'https://api.twitch.tv/helix';
   private twitchAPIUserEndpoint = `${this.twitchAPIEndpoint}/users`;
   private twitchAPIStreamEndpoint = `${this.twitchAPIEndpoint}/streams`;
   private twitchAPIWebhookEndpoint = `${this.twitchAPIEndpoint}/eventsub/subscriptions`;
+  private twitchAPIScheduleEndpoint = `${this.twitchAPIEndpoint}/schedule/segment`;
 
   private headers: Record<string, string | number | boolean>;
   private wsHeaders: Record<string, string | number | boolean>;
@@ -94,8 +96,8 @@ export default class API {
       const payload = {
         type: 'stream.online',
         version: '1',
-        condition: {broadcaster_user_id: `${this._config.TWITCH_CHANNEL_ID}`},
-        transport: {method: 'websocket', session_id: sessionId},
+        condition: { broadcaster_user_id: `${this._config.TWITCH_CHANNEL_ID}` },
+        transport: { method: 'websocket', session_id: sessionId },
       };
 
       const response = await axios.post(
@@ -126,8 +128,8 @@ export default class API {
       const payload = {
         type: 'stream.offline',
         version: '1',
-        condition: {broadcaster_user_id: `${this._config.TWITCH_CHANNEL_ID}`},
-        transport: {method: 'websocket', session_id: sessionId},
+        condition: { broadcaster_user_id: `${this._config.TWITCH_CHANNEL_ID}` },
+        transport: { method: 'websocket', session_id: sessionId },
       };
 
       const response = await axios.post(
@@ -156,9 +158,8 @@ export default class API {
    * @param id id or username of the user to retrieve
    */
   public async getUser(id: number | string): Promise<User | undefined> {
-    const url = `${this.twitchAPIUserEndpoint}?${
-      Number.isInteger(id) ? 'id=' : 'login='
-    }${id}`;
+    const url = `${this.twitchAPIUserEndpoint}?${Number.isInteger(id) ? 'id=' : 'login='
+      }${id}`;
 
     let user: User | undefined = undefined;
 
@@ -210,5 +211,84 @@ export default class API {
     }
 
     return stream;
+  }
+
+  public async createScheduledStream(gathering: GatheringEvent): Promise<string | undefined> {
+    const url = `${this.twitchAPIScheduleEndpoint}?broadcaster_id=${this._config.TWITCH_CHANNEL_ID}`;
+
+    let scheduledSegmentId: string | undefined = undefined;
+
+    const body = {
+      start_time: gathering.releaseDateStart,
+      timezone: 'America/Chicago',
+      title: gathering.name,
+      category_id: '509670',
+      is_recurring: false,
+      duration: 180,
+    }
+
+    try {
+      const response: AxiosResponse = await axios.post(url, body, {
+        headers: this.headers
+      });
+      if (response.data) {
+        const data = response.data;
+        if (data.segments && data.segments.length > 0) {
+          scheduledSegmentId = data.segments[0].id;
+
+          log(
+            LogLevel.Info,
+            LogArea.TwitchAPI,
+            `Created Twitch segment ${gathering.name} (${scheduledSegmentId})`,
+          );
+
+          // Publish new Twitch Event Id to Pipedream/Notion
+          await fetch(
+            this._config.PIPEDREAM_UPDATE_TWITCH_EVENT_ID_WEBHOOK as string,
+            {
+              method: 'POST',
+              body: JSON.stringify({
+                notionPageId: gathering.id,
+                twitchEventId: scheduledSegmentId,
+              }),
+            },
+          );
+        }
+      }
+    } catch (err) {
+      log(LogLevel.Error, LogArea.TwitchAPI, `createScheduledStream ${err}`);
+    }
+    return scheduledSegmentId;
+  }
+
+  public async updateScheduledStream(gathering: GatheringEvent): Promise<string | undefined> {
+    const url = `${this.twitchAPIScheduleEndpoint}?broadcaster_id=${this._config.TWITCH_CHANNEL_ID}&id=${gathering.twitchEventId}`;
+
+    let scheduledSegmentId: string | undefined = undefined;
+
+    const body = {
+      start_time: gathering.releaseDateStart,
+      timezone: 'America/Chicago',
+      title: gathering.name,
+      category_id: '509670',
+      is_recurring: false,
+      duration: 180,
+      is_canceled: gathering.status.toLocaleLowerCase() === 'canceled'
+    }
+
+    try {
+      const response: AxiosResponse = await axios.patch(url, body, {
+        headers: this.headers
+      });
+      if (response.data) {
+        const data = response.data;
+        if (data.segments && data.segments.length > 0) {
+          scheduledSegmentId = data.segments[0].id;
+        }
+      }
+    } catch (err) {
+      log(LogLevel.Error, LogArea.TwitchAPI, `updateScheduledStream ${err}`);
+    }
+    return scheduledSegmentId;
   }
 }
