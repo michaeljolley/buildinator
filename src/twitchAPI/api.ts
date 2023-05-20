@@ -217,7 +217,7 @@ export default class API {
       start_time: gathering.releaseDateStart,
       timezone: 'America/Chicago',
       title: gathering.name,
-      category_id: '509670',
+      category_id: '1469308723',
       is_recurring: false,
       duration: 180,
     }
@@ -267,7 +267,7 @@ export default class API {
       start_time: gathering.releaseDateStart,
       timezone: 'America/Chicago',
       title: gathering.name,
-      category_id: '509670',
+      category_id: '1469308723',
       is_recurring: false,
       duration: 180,
       is_canceled: gathering.status.toLocaleLowerCase() === 'canceled'
