@@ -174,8 +174,8 @@ const app = new Vue({
       this.stopAudio();
     });
 
-    this.socket.on('onFollow', onFollowEvent => {
-      this.addAlert('onFollow', onFollowEvent);
+    this.socket.on('twitch:follow', onFollowEvent => {
+      this.addAlert('twitch:follow', onFollowEvent);
     });
 
     this.socket.on('twitch:sub', onSubEvent => {
