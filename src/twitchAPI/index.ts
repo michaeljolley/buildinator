@@ -28,7 +28,7 @@ export default abstract class TwitchAPI {
       this.gatheringScheduledHandler.bind(this),
     );
 
-    this.client = new WebSocket('wss://eventsub-beta.wss.twitch.tv/ws');
+    this.client = new WebSocket('wss://eventsub.wss.twitch.tv/ws');
 
     this.client.onclose = () => {
       log(
@@ -36,7 +36,7 @@ export default abstract class TwitchAPI {
         LogArea.TwitchAPI,
         `Twitch WS: Reconnecting to Twitch`,
       );
-      this.client = new WebSocket('wss://eventsub-beta.wss.twitch.tv/ws');
+      this.client = new WebSocket('wss://eventsub.wss.twitch.tv/ws');
     };
 
     this.client.onerror = err => {
