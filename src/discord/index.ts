@@ -6,6 +6,7 @@ import {
   GuildScheduledEventEntityType,
   GuildScheduledEventPrivacyLevel,
   GuildScheduledEventStatus,
+  TextChannel,
   VoiceState,
 } from 'discord.js';
 import { titleCase } from 'title-case';
@@ -18,6 +19,7 @@ import { LogArea, LogLevel, log } from '../log';
 import { GitHubPullRequestEvent } from '../types/githubPullRequestEvent';
 import { Orbit } from '../orbit';
 import { BuildinatorConfig } from '../types/buildinatorConfig';
+import { DiscordSayEvent } from '../types/discordSayEvent';
 
 const DISCORD_INTENTS = [
   GatewayIntentBits.Guilds,
@@ -58,6 +60,10 @@ export default abstract class Discord {
       EventBus.eventEmitter.on(
         Events.PullRequestMerged,
         this.pullRequestMergedHandler.bind(this),
+      );
+      EventBus.eventEmitter.on(
+        Events.DiscordSay,
+        this.discordSayHandler.bind(this),
       );
 
       await this.registerDiscordEventListeners();
@@ -288,6 +294,27 @@ export default abstract class Discord {
           : await this.updateScheduledEvent(gathering);
       }
     }
+  }
+  /**
+   * Sends a message to Discord based on the event payload.
+   * @param discordSayEvent An object describing what to say in Discord
+   */
+  static async discordSayHandler(discordSayEvent: DiscordSayEvent) {
+    try {
+      const guild = await this.getGuild();
+      if (guild) { 
+        const channel = await guild.channels.cache.get(discordSayEvent.channelId) as TextChannel;
+        if (channel) {
+         await channel.send(discordSayEvent.message);
+        }
+      }
+     } catch (error) {
+        log(
+          LogLevel.Error,
+          LogArea.Discord,
+          `Error sending message in Discord ${discordSayEvent.type}}\n${error}`,
+        );
+      }
   }
 
   static async pullRequestMergedHandler(

@@ -5,6 +5,7 @@ export enum Events {
   GatheringScheduled = 'gathering:scheduled',
   GatheringStart = 'gathering:start',
   GatheringEnd = 'gathering:end',
+  DiscordSay = 'discord:say',
   ShareableCreated = 'shareable:created',
   PullRequestMerged = 'contributions:pullrequest:merged',
   OnChatMessage = 'twitch:chat_message',

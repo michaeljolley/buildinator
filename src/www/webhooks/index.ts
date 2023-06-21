@@ -17,6 +17,15 @@ export function webhooksRouter(config: BuildinatorConfig): Router {
   });
 
   /**
+   * This endpoint is used by Pipedream to send a webhook when it's time to
+   * say something in Discord.
+   */
+  router.use('/discord-say', (req, res) => {
+    EventBus.eventEmitter.emit(Events.DiscordSay, req.body);
+    res.status(200).send();
+  });
+
+  /**
    * This endpoint is used by GitHub to send a webhook when an commit is merged
    * in the builders-club organization.
    */
