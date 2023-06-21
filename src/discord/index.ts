@@ -86,11 +86,6 @@ export default abstract class Discord {
     oldGuildScheduledEvent: GuildScheduledEvent<GuildScheduledEventStatus> | null,
     newGuildScheduledEvent: GuildScheduledEvent<GuildScheduledEventStatus>,
   ): Promise<void> {
-    log(
-      LogLevel.Info,
-      LogArea.Discord,
-      `Scheduled Event updated: ${newGuildScheduledEvent.name} (${newGuildScheduledEvent.status})`,
-    );
 
     // If the event is a Brew With Me event, and it's completed, we need to
     // review any attendees and possibly assign them the Builders role.
@@ -115,6 +110,7 @@ export default abstract class Discord {
     newGuildScheduledEvent: GuildScheduledEvent<GuildScheduledEventStatus>,
   ) {
     const existingAttendees = newGuildScheduledEvent.channel?.members.values();
+    let existingCount = 0;
     if (existingAttendees) {
       for (const m of existingAttendees) {
         this._attendees[m.id] = {
@@ -122,8 +118,14 @@ export default abstract class Discord {
           join: new Date(),
           durationInMinutes: 0,
         };
+        existingCount++;
       }
     }
+    log(
+      LogLevel.Info,
+      LogArea.Discord,
+      `Scheduled Event started: ${newGuildScheduledEvent.name} (${existingCount} initial attendees)`,
+    );
   }
 
   private static async endEvent(
@@ -168,10 +170,11 @@ export default abstract class Discord {
         // If the attendee was around for at least 15 minutes, log their
         // attendance in Orbit.
         if (totalDurationInMinutes >= 15) {
+          
           await Orbit.addActivity(
             {
               title: `Attended ${newGuildScheduledEvent.name}`,
-              description: `Attended ${newGuildScheduledEvent.name} for ${totalDurationInMinutes} minutes`,
+              description: `Attended ${newGuildScheduledEvent.name} for ${Math.round(totalDurationInMinutes)} minutes`,
               activity_type: 'buildinator',
               activity_type_key: OrbitActivities.BrewWithMe,
               link: `https://discord.com/channels/${this._config.DISCORD_GUILD_ID}/${this._config.DISCORD_CHANNEL_ID_BREW_WITH_ME}`,
@@ -187,7 +190,7 @@ export default abstract class Discord {
       log(
         LogLevel.Info,
         LogArea.Discord,
-        `${membersToReview.length} members attended ${newGuildScheduledEvent.name}.}`,
+        `${membersToReview.length} members attended ${newGuildScheduledEvent.name}.`,
       );
 
       this._attendees = {};
