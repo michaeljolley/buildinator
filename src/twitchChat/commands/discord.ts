@@ -20,7 +20,7 @@ export function discord(onCommandEvent: OnCommandEvent): void {
     return;
   }
 
-  const message = `You can join our discord using this link: https://discord.gg/XSG7HJm`;
+  const message = `You can join our discord using this link: https://discord.gg/kC8HTrs59R`;
 
   // Send the message to Twitch chat
   EventBus.eventEmitter.emit(Events.OnSay, new OnSayEvent(message));

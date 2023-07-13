@@ -8,7 +8,6 @@ import Discord from './discord';
 import TwitchChat from './twitchChat';
 import WWW from './www';
 import { BuildinatorConfig } from './types/buildinatorConfig';
-import { TwitchTokenResponse } from './types/twitchTokenResponse';
 import { LogArea, LogLevel, log } from './log';
 import TwitchAPI from './twitchAPI';
 import { WebSockets } from './websockets';

@@ -19,7 +19,7 @@ export function twitter(onCommandEvent: OnCommandEvent): void {
     return;
   }
 
-  const message = `Follow Michael on Twitter at https://twitter.com/baldbeardbuild`;
+  const message = `Follow Michael on Twitter at https://twitter.com/michaeljolley`;
 
   // Send the message to Twitch chat
   EventBus.eventEmitter.emit(Events.OnSay, new OnSayEvent(message));
