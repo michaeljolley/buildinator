@@ -12,24 +12,18 @@ export default class API {
   private twitchAPIScheduleEndpoint = `${this.twitchAPIEndpoint}/schedule/segment`;
 
   private headers: Headers;
-  private wsHeaders: Headers;
   private headersNoScope: Headers;
   private _config: BuildinatorConfig;
 
   constructor(config: BuildinatorConfig) {
     this._config = config;
     this.headers = new Headers([
-      ["Authorization", `Bearer ${this._config.TWITCH_CHANNEL_AUTH_TOKEN}`],
-      ['Content-Type', 'application/json'],
-      ['Client-ID', this._config.TWITCH_CLIENT_ID]
-    ]);
-    this.wsHeaders = new Headers([
-      ["Authorization", `Bearer ${this._config.TWITCH_BOT_AUTH_TOKEN}`],
+      ["Authorization", `Bearer ${this._config.TWITCH_AUTH_TOKEN}`],
       ['Content-Type', 'application/json'],
       ['Client-ID', this._config.TWITCH_CLIENT_ID]
     ]);
     this.headersNoScope = new Headers([
-      ["Authorization", `Bearer ${this._config.TWITCH_BOT_AUTH_TOKEN_NO_SCOPE}`],
+      ["Authorization", `Bearer ${this._config.TWITCH_AUTH_TOKEN_NO_SCOPE}`],
       ['Content-Type', 'application/json'],
       ['Client-ID', this._config.TWITCH_CLIENT_ID]
     ]);
@@ -59,7 +53,7 @@ export default class API {
         version: '2',
         condition: {
           broadcaster_user_id: this._config.TWITCH_CHANNEL_ID,
-          moderator_user_id: this._config.TWITCH_BOT_CHANNEL_ID,
+          moderator_user_id: this._config.TWITCH_CHANNEL_ID,
         },
         transport: {
           method: 'websocket',
@@ -69,7 +63,7 @@ export default class API {
 
       const response = await fetch(this.twitchAPIWebhookEndpoint, {
         method: 'POST',
-        headers: this.wsHeaders,
+        headers: this.headers,
         body: JSON.stringify(payload),
       });
       log(

@@ -52,7 +52,7 @@ export default abstract class TwitchChat {
     ComfyJS.Init(
       this._config.TWITCH_BOT_USERNAME,
       this._config.TWITCH_BOT_AUTH_TOKEN,
-      this._config.TWITCH_CHANNEL_NAME,
+      this._config.TWITCH_CHANNEL_NAME
     );
 
     EventBus.eventEmitter.addListener(Events.OnSay, (onSayEvent: OnSayEvent) =>

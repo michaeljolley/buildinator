@@ -3,6 +3,7 @@ dotenv.config();
 
 import express from 'express';
 import http from 'http';
+import { getTwitchAccessToken } from '@jlengstorf/get-twitch-oauth';
 
 import Discord from './discord';
 import TwitchChat from './twitchChat';
@@ -27,12 +28,12 @@ const config: BuildinatorConfig = {
   WWW_PORT: parseInt(process.env.WWW_PORT as string),
   WWW_HOST: process.env.WWW_HOST as string,
   DISCORD_ROLE_BUILDERS: process.env.DISCORD_ROLE_BUILDERS as string,
+  TWITCH_AUTH_TOKEN: process.env.TWITCH_AUTH_TOKEN as string,
+  TWITCH_AUTH_TOKEN_NO_SCOPE: process.env
+    .TWITCH_AUTH_TOKEN_NO_SCOPE as string,
   TWITCH_BOT_AUTH_TOKEN: process.env.TWITCH_BOT_AUTH_TOKEN as string,
-  TWITCH_BOT_AUTH_TOKEN_NO_SCOPE: process.env
-    .TWITCH_BOT_AUTH_TOKEN_NO_SCOPE as string,
   TWITCH_BOT_USERNAME: process.env.TWITCH_BOT_USERNAME as string,
   TWITCH_CHANNEL_NAME: process.env.TWITCH_CHANNEL_NAME as string,
-  TWITCH_CHANNEL_AUTH_TOKEN: process.env.TWITCH_CHANNEL_AUTH_TOKEN as string,
   TWITCH_CLIENT_ID: process.env.TWITCH_CLIENT_ID as string,
   TWITCH_CHANNEL_ID: process.env.TWITCH_CHANNEL_ID as string,
   TWITCH_BOT_CHANNEL_ID: process.env.TWITCH_BOT_CHANNEL_ID as string,
@@ -43,7 +44,7 @@ const server = http.createServer(app);
 
 new WebSockets(server, config);
 WWW(app, config);
-
+  
 server.listen(config.WWW_PORT, () =>
   log(
     LogLevel.Info,
@@ -54,6 +55,7 @@ server.listen(config.WWW_PORT, () =>
 
 TwitchAPI.init(config);
 TwitchChat.init(config);
+
 Discord.init(config);
 
 // close all streams and clean up anything needed for the stream

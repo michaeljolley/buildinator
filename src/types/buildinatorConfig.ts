@@ -11,10 +11,10 @@ export type BuildinatorConfig = {
   WWW_HOST: string;
   DISCORD_ROLE_BUILDERS: string;
   TWITCH_BOT_USERNAME: string;
-  TWITCH_BOT_AUTH_TOKEN: string;
-  TWITCH_BOT_AUTH_TOKEN_NO_SCOPE: string;
   TWITCH_CHANNEL_NAME: string;
-  TWITCH_CHANNEL_AUTH_TOKEN: string;
+  TWITCH_AUTH_TOKEN: string;
+  TWITCH_AUTH_TOKEN_NO_SCOPE: string;
+  TWITCH_BOT_AUTH_TOKEN: string;
   TWITCH_CLIENT_ID: string;
   TWITCH_CHANNEL_ID: string;
   TWITCH_BOT_CHANNEL_ID: string;
