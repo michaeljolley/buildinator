@@ -21,7 +21,6 @@
   },
   "license": "ISC",
   "dependencies": {
-    "@jlengstorf/get-twitch-oauth": "^1.0.1",
     "comfy.js": "^1.1.16",
     "discord.js": "^14.11.0",
     "dotenv": "^16.0.3",

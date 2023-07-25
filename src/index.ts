@@ -3,7 +3,6 @@ dotenv.config();
 
 import express from 'express';
 import http from 'http';
-import { getTwitchAccessToken } from '@jlengstorf/get-twitch-oauth';
 
 import Discord from './discord';
 import TwitchChat from './twitchChat';
