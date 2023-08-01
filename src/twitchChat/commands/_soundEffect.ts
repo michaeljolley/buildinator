@@ -27,7 +27,7 @@ export function _SoundEffect(onCommandEvent: OnCommandEvent): void {
 
   // When running inside a container the audio files are in a slightly different location
   if (fs.existsSync('./www')) {
-    basePath = './www/public';
+    basePath = './www/overlays/public';
   }
   const fullpath = `${basePath}/assets/audio/clips/${filename}`;
 
