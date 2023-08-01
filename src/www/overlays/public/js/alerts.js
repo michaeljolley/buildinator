@@ -36,6 +36,7 @@ const app = new Vue({
     return {
       alerts: [],
       socket: null,
+      muted: false,
       activeAudioPlayer: null,
       activeAlert: {
         line1: null,
@@ -78,6 +79,14 @@ const app = new Vue({
       let audio = this.$refs.audioFile;
       audio.pause();
       this.alerts = this.alerts.filter(f => f.line1);
+    },
+    muteAudio() {
+      let audio = this.$refs.audioFile;
+      audio.pause();
+      this.muted = true;
+    },
+    unmuteAudio() {
+      this.muted = false;
     },
     processNextAlert() {
       const nextAlert = this.alerts[0];
@@ -137,7 +146,7 @@ const app = new Vue({
         line2: line2 ? line2.split('') : null,
         line3: line3 ? line3.split('') : null,
         line4: line4 ? line4.split('') : null,
-        audio
+        audio: this.muted ? null : audio
       };
       this.playAudio();
 
@@ -150,7 +159,7 @@ const app = new Vue({
           audio: null
         };
         this.audio = null;
-      }, 10000);
+      }, 5000);
     },
     onInterval() {
       if (!this.activeAlert.line1 &&
@@ -172,6 +181,14 @@ const app = new Vue({
 
     this.socket.on('twitch:stop', onStopEvent => {
       this.stopAudio();
+    });
+    
+    this.socket.on('twitch:mute', onMuteEvent => {
+      this.muteAudio();
+    });
+    
+    this.socket.on('twitch:unmute', onUnmuteEvent => {
+      this.unmuteAudio();
     });
 
     this.socket.on('twitch:follow', onFollowEvent => {

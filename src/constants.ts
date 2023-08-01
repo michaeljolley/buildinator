@@ -15,6 +15,8 @@ export enum Events {
   OnFollow = 'twitch:follow',
   OnJoin = 'twitch:join',
   OnPart = 'twitch:part',
+  OnMute = 'twitch:mute',
+  OnUnmute = 'twitch:unmute',
   OnPointRedemption = 'twitch:point_redemption',
   OnSoundEffect = 'twitch:sound_effect',
   OnStop = 'twitch:stop',

@@ -19,6 +19,8 @@ import {OnRaidEvent} from '../types/events/onRaidEvent';
 import {OnCreditRollEvent} from '../types/events/onCreditRollEvent';
 import {UserEvent} from '../types/userEvent';
 import {OnStreamEvent} from '../types/events/onStreamEvent';
+import { OnMuteEvent } from '../types/events/onMuteEvent';
+import { OnUnmuteEvent } from '../types/events/onUnmuteEvent';
 
 export class WebSockets {
   private io: IOServer;
@@ -78,6 +80,14 @@ export class WebSockets {
       Events.OnStop,
       (onStopEvent: OnStopEvent) => this.onStop(onStopEvent),
     );
+    EventBus.eventEmitter.addListener(
+      Events.OnMute,
+      (onMuteEvent: OnMuteEvent) => this.onMute(onMuteEvent),
+    );
+    EventBus.eventEmitter.addListener(
+      Events.OnUnmute,
+      (onUnmuteEvent: OnUnmuteEvent) => this.onUnmute(onUnmuteEvent),
+    );
     EventBus.eventEmitter.addListener(Events.OnSub, (onSubEvent: OnSubEvent) =>
       this.onSub(onSubEvent),
     );
@@ -134,6 +144,14 @@ export class WebSockets {
 
   private onStop(onStopEvent: OnStopEvent) {
     this.io.emit(Events.OnStop, onStopEvent);
+  }
+  
+  private onMute(onMuteEvent: OnMuteEvent) {
+    this.io.emit(Events.OnMute, onMuteEvent);
+  }
+  
+  private onUnmute(onUnmuteEvent: OnUnmuteEvent) {
+    this.io.emit(Events.OnUnmute, onUnmuteEvent);
   }
 
   private onSub(onSubEvent: OnSubEvent) {
