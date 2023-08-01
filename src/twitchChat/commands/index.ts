@@ -10,6 +10,7 @@ export * from './help';
 export * from './instagram';
 export * from './livecoders';
 export * from './project';
+export * from './sfx';
 export * from './stop';
 export * from './store';
 export * from './theme';

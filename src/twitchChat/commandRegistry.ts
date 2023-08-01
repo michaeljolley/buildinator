@@ -7,6 +7,7 @@ import {
   help,
   instagram,
   project,
+  sfx,
   store,
   stop,
   theme,
@@ -31,6 +32,7 @@ export abstract class CommandRegistry {
     this.commands.push(new Command('help', help));
     this.commands.push(new Command('instagram', instagram));
     this.commands.push(new Command('project', project));
+    this.commands.push(new Command('sfx', sfx));
     this.commands.push(new Command('stop', stop));
     this.commands.push(new Command('store', store));
     this.commands.push(new Command('theme', theme));
