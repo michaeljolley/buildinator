@@ -1,8 +1,8 @@
 Vue.config.devtools = true;
 
 Vue.component('chatMessage', {
-  template: '<div class="message" v-bind:class="{ hide: hideMe, highlighted: onChatMessageEvent.flags.highlighted, mod: onChatMessageEvent.flags.mod, vip: onChatMessageEvent.flags.vip }" v-bind:style="{ order: total - ind }"><div class="wrap"><div class="panel"><div class="user" v-bind:style="{ backgroundImage: `url(${onChatMessageEvent.user.avatar_url})` }"></div><div class="bubble"><div v-html="onChatMessageEvent.sanitizedMessage"></div><div class="name">{{onChatMessageEvent.user.display_name}}</div></div></div></div></div>',
-  props: ['ind', 'onChatMessageEvent', 'total'],
+  template: '<div class="message" v-bind:class="{ hide: getOuttaHere || hideMe, highlighted: onChatMessageEvent.flags.highlighted, mod: onChatMessageEvent.flags.mod, vip: onChatMessageEvent.flags.vip }" v-bind:style="{ order: total - ind }"><div class="wrap"><div class="panel"><div class="user" v-bind:style="{ backgroundImage: `url(${onChatMessageEvent.user.avatar_url})` }"></div><div class="bubble"><div v-html="onChatMessageEvent.sanitizedMessage"></div><div class="name">{{onChatMessageEvent.user.display_name}}</div></div></div></div></div>',
+  props: ['ind', 'onChatMessageEvent', 'total', 'getOuttaHere'],
   data: function () {
     return {
       destroyTimeout: null,
@@ -27,7 +27,8 @@ const app = new Vue({
   data: function () {
     return {
       messages: [],
-      socket: null
+      socket: null,
+      shouldClear: false
     };
   },
   computed: {
@@ -41,8 +42,13 @@ const app = new Vue({
       Vue.nextTick(this.checkOverflow);
     },
     clearMessages() {
-      this.messages = [];
-      Vue.nextTick(this.checkOverflow);
+      this.shouldClear = true;
+      const clearMSGTimeout = setTimeout(() => {
+        this.messages = [];
+        Vue.nextTick(this.checkOverflow);
+        this.shouldClear = false;
+        clearTimeout(clearMSGTimeout);
+      }, 1200);
     },
     removeMessages(count) {
       this.messages = this.messages.slice(count);
@@ -79,7 +85,7 @@ const app = new Vue({
   },
   template: `<div class="chat" v-bind:class="{ fade: hasHighlight }">
               <transition-group name="list" @after-leave="checkOverflow">
-                <chatMessage v-for="(message, index) in messages" :key="message.id" :onChatMessageEvent="message" :ind="index" :total="messages.length" v-on:removeItem="removeItem" ref="message"></chatMessage>
+                <chatMessage v-for="(message, index) in messages" :key="message.id" :onChatMessageEvent="message" :ind="index" :total="messages.length"  :getOuttaHere="shouldClear" v-on:removeItem="removeItem" ref="message"></chatMessage>
               </transition-group>
             </div>`
 })
