@@ -8,9 +8,9 @@ import {OnClearEvent} from '../../types/events/onClearEvent';
  * @param onCommandEvent
  */
 export function clear(onCommandEvent: OnCommandEvent): void {
-  // Only the broadcaster & mods should be able to stop effects
+  // Only the broadcaster & mods should be able to clear the chat overlay
   if (onCommandEvent.flags.broadcaster || onCommandEvent.flags.mod) {
     // Send the message to Twitch chat
-    EventBus.eventEmitter.emit(Events.OnStop, new OnClearEvent());
+    EventBus.eventEmitter.emit(Events.OnClear, new OnClearEvent());
   }
 }
