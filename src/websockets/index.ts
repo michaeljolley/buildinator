@@ -83,7 +83,7 @@ export class WebSockets {
     );
     EventBus.eventEmitter.addListener(
       Events.OnClear,
-      (onClearEvent: OnClearEvent) => this.onStop(onClearEvent),
+      (onClearEvent: OnClearEvent) => this.onClear(onClearEvent),
     );
     EventBus.eventEmitter.addListener(
       Events.OnMute,
