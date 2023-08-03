@@ -40,6 +40,10 @@ const app = new Vue({
       this.messages = [...this.messages, onChatMessageEvent];
       Vue.nextTick(this.checkOverflow);
     },
+    clearMessages() {
+      this.messages = [];
+      Vue.nextTick(this.checkOverflow);
+    },
     removeMessages(count) {
       this.messages = this.messages.slice(count);
     },
@@ -61,6 +65,10 @@ const app = new Vue({
 
     this.socket.on('twitch:chat_message', onChatMessageEvent => {
       this.addMessage(onChatMessageEvent);
+    });
+    
+    this.socket.on('twitch:clear', onClearEvent => {
+      this.clearMessages();
     });
 
     this.socket.on('reconnect', () => {

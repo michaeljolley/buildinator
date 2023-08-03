@@ -21,6 +21,7 @@ import {UserEvent} from '../types/userEvent';
 import {OnStreamEvent} from '../types/events/onStreamEvent';
 import { OnMuteEvent } from '../types/events/onMuteEvent';
 import { OnUnmuteEvent } from '../types/events/onUnmuteEvent';
+import { OnClearEvent } from '../types/events/onClearEvent';
 
 export class WebSockets {
   private io: IOServer;
@@ -79,6 +80,10 @@ export class WebSockets {
     EventBus.eventEmitter.addListener(
       Events.OnStop,
       (onStopEvent: OnStopEvent) => this.onStop(onStopEvent),
+    );
+    EventBus.eventEmitter.addListener(
+      Events.OnClear,
+      (onClearEvent: OnClearEvent) => this.onStop(onClearEvent),
     );
     EventBus.eventEmitter.addListener(
       Events.OnMute,
@@ -144,6 +149,10 @@ export class WebSockets {
 
   private onStop(onStopEvent: OnStopEvent) {
     this.io.emit(Events.OnStop, onStopEvent);
+  }
+  
+  private onClear(onClearEvent: OnClearEvent) {
+    this.io.emit(Events.OnClear, onClearEvent);
   }
   
   private onMute(onMuteEvent: OnMuteEvent) {

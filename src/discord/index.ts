@@ -281,18 +281,23 @@ export default abstract class Discord {
     // If the event type is a stream or brew with me, then we need
     // to create a Discord event. We also need to make sure that the
     // event has a start and end date.
-    if (
-      gathering.type === NOTION_EVENT_TYPE_TWITCH ||
-      gathering.type === NOTION_EVENT_TYPE_BREW_WITH_ME
-    ) {
-      if (gathering.releaseDateStart && gathering.releaseDateEnd) {
-        // If the Notion event has a `discordEventId`, we've already created
-        // it in Discord. In that event, we need to update/delete the event
-        // in Discord.
-        gathering.discordEventId === null
-          ? await this.createScheduledEvent(gathering)
-          : await this.updateScheduledEvent(gathering);
+    try {
+      if (
+        gathering.type === NOTION_EVENT_TYPE_TWITCH ||
+        gathering.type === NOTION_EVENT_TYPE_BREW_WITH_ME
+      ) {
+        if (gathering.releaseDateStart && gathering.releaseDateEnd) {
+          // If the Notion event has a `discordEventId`, we've already created
+          // it in Discord. In that event, we need to update/delete the event
+          // in Discord.
+        !gathering.discordEventId ||
+        gathering.discordEventId?.length === 0
+            ? await this.createScheduledEvent(gathering)
+            : await this.updateScheduledEvent(gathering);
+        }
       }
+    } catch(error) {
+      log(LogLevel.Error, LogArea.Discord, `gatheringScheduledHandler: ${error}`);
     }
   }
   /**

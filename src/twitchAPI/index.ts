@@ -219,18 +219,24 @@ export default abstract class TwitchAPI {
   static async gatheringScheduledHandler(gathering: GatheringEvent) {
     // If the event type is a stream , then we need
     // to create or update a Twitch scheduled segment.
-    if (
-      gathering.type === NOTION_EVENT_TYPE_TWITCH
-    ) {
-      if (gathering.releaseDateStart) {
-        const twitchAPI = new API(this._config);
-        // If the Notion event has a `twitchEventId`, we've already created
-        // it in Twitch. In that event, we need to update/delete the event
-        // in Twitch.
-        gathering.twitchEventId === null
-          ? await twitchAPI.createScheduledStream(gathering)
-          : await twitchAPI.updateScheduledStream(gathering);
+    try {
+      if (
+        gathering.type === NOTION_EVENT_TYPE_TWITCH
+      ) {
+        if (gathering.releaseDateStart) {
+          const twitchAPI = new API(this._config);
+          // If the Notion event has a `twitchEventId`, we've already created
+          // it in Twitch. In that event, we need to update/delete the event
+          // in Twitch.
+          !gathering.twitchEventId ||
+          gathering.twitchEventId?.length === 0
+            ? await twitchAPI.createScheduledStream(gathering)
+            : await twitchAPI.updateScheduledStream(gathering);
+        }
       }
+    }
+    catch(error) {
+      log(LogLevel.Error, LogArea.TwitchAPI, `gatheringScheduledHandler: ${error}`);
     }
   }
 
