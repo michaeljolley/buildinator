@@ -38,11 +38,12 @@ const app = new Vue({
       socket: null,
       muted: false,
       activeAudioPlayer: null,
+      topic: '',
       activeAlert: {
-        line1: null,
-        line2: null,
-        line3: null,
-        line4: null,
+        name: null,
+        message: null,
+        subtext: null,
+        icon: null,
         audio: null
       }
     };
@@ -97,11 +98,9 @@ const app = new Vue({
       } else if (nextAlert.data.user) {
         name = nextAlert.data.user.display_name || nextAlert.data.user.login;
       }
-
-      let line1;
-      let line2;
-      let line3;
-      let line4;
+      let message;
+      let subtext;
+      let icon;
       let audio;
 
       switch (nextAlert.type) {
@@ -109,53 +108,51 @@ const app = new Vue({
           audio = this.clipsAudioSrc(nextAlert.data.filename);
           break;
         case 'twitch:follow':
-          line1 = 'New';
-          line2 = name;
-          line3 = 'Follower';
-          audio = this.alertsAudioSrc('ohmy');
+          message = `<span>${name}</span> just followed the channel`;
+          icon = '';
           break;
         case 'twitch:sub':
-          line1 = 'Thanks';
-          line2 = name;
-          line3 = 'for the sub';
+          message = `just subscribed`;
+          subtext = "We'll make a donation to Backpack Buddies. Use !bpb to learn more";
+          icon = '';
           audio = this.alertsAudioSrc('hair');
           break;
-        case 'twich:raid':
-          line1 = 'Raid';
-          line2 = name;
-          line3 = 'Alert';
+        case 'twich:raid': 
+          message = `just joined in the fun`;
+          subtext = "Welcome raiders!";
+          icon = '';
           audio = this.alertsAudioSrc('goodbadugly');
           break;
         case 'twitch:cheer':
-          line1 = ' ';
-          line2 = name;
-          line3 = `cheered  ${nextAlert.data.bits} bits!`;
+          message = `, thanks for the support`;
+          subtext = "We'll make a donation to Backpack Buddies. Use !bpb to learn more";
+          icon = '';
           audio = this.alertsAudioSrc('cheer');
           break;
         case 'twitch:donation':
-          line1 = 'Donation Alert!';
-          line2 = name;
-          line3 = `gave  $${nextAlert.data.amount}`;
+          message = `, gave $${nextAlert.data.amount}}!`;
+          subtext = "We'll make a donation to Backpack Buddies. Use !bpb to learn more";
+          icon = '';
           audio = this.alertsAudioSrc('donate');
           break;
       }
 
       this.alerts.shift();
       this.activeAlert = {
-        line1: line1 ? line1.split('') : null,
-        line2: line2 ? line2.split('') : null,
-        line3: line3 ? line3.split('') : null,
-        line4: line4 ? line4.split('') : null,
+        name,
+        message: message ? message : null,
+        subtext: subtext ? subtext : null,
+        icon: icon ? icon : null,
         audio: this.muted ? null : audio
       };
       this.playAudio();
 
       setTimeout(() => {
         this.activeAlert = {
-          line1: null,
-          line2: null,
-          line3: null,
-          line4: null,
+          name: null,
+          message: null,
+          subtext: null,
+          icon: null,
           audio: null
         };
         this.audio = null;
@@ -220,27 +217,27 @@ const app = new Vue({
     setInterval(this.onInterval, 2000);
   },
   template:
-    `<div class="alerts" v-if="activeAlert">
-      <audio ref="audioFile"/>
-      <transition name="fade">
-        <div class="sign pink" v-if="activeAlert.line1">
-          <letter v-for="(letter, index) in activeAlert.line1" :key="index" :letter="letter"/>
+    `<div class="bar">
+        <div class="container">
+          <audio ref="audioFile"/>
+
+          <div class="left">
+            <svg
+              id="a"
+              class="fill logo"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 50 50"
+            >
+              <path
+                d="M20.84,24.89c0,1.72-1.4,3.12-3.12,3.12s-3.12-1.4-3.12-3.12,1.4-3.12,3.12-3.12,3.12,1.39,3.12,3.12Zm11.57-3.12c-1.72,0-3.12,1.4-3.12,3.12s1.4,3.12,3.12,3.12,3.12-1.4,3.12-3.12c0-1.73-1.4-3.12-3.12-3.12Zm13.8-.86c-.41-.56-.91-1.06-1.49-1.46C43.23,9.01,34.85,1,25.03,1h-.07C15.14,1,6.76,9.01,5.27,19.46c-.57,.4-1.08,.89-1.49,1.46-.72,.99-1.14,2.21-1.14,3.53,0,3.34,2.71,5.96,6.06,5.96h.11v-3.79h-.14c-1.27,0-2.29-1.05-2.29-2.32s1.14-2.31,2.42-2.32h.06c.11-1.34,.26-2.53,.47-3.56h0c1.58-7.84,8.06-13.72,15.62-13.72h.1c7.57,0,14.04,5.88,15.62,13.72h0c.2,1.03,.36,2.21,.47,3.56h.07c1.28,0,2.42,1.04,2.42,2.32s-1.03,2.31-2.29,2.32h-.14v3.79h.11c3.34,0,6.06-2.61,6.06-5.96,0-1.32-.43-2.54-1.15-3.53Zm-5.03,12.34v7.06c0,2.46-1.99,4.44-4.44,4.44h-5.7c-4.23,0-4.24,4.19-4.24,4.24h-3.6s0-4.24-4.24-4.24h-5.7c-2.46,0-4.44-1.99-4.44-4.44v-7.06c1.98,0,3.6,1.61,3.6,3.6v2.85s0,.8,.72,.8h2.97v-3.66c0-1.35,1.09-2.44,2.44-2.44h3.14c2.32,0,2.33-2.32,2.33-2.33h1.97s0,2.33,2.33,2.33h3.14c1.35,0,2.44,1.09,2.44,2.44v3.66h2.97c.71,0,.72-.8,.72-.8v-2.85c0-1.99,1.6-3.6,3.59-3.6Zm-9.26,3.91s0-.44-.4-.44h-3.58c-.87,0-1.55-.17-2.02-.49s-.76-.86-.92-1.59c-.17,.74-.46,1.27-.92,1.59s-1.14,.49-2.02,.49h-3.58c-.39,0-.4,.44-.4,.44v3.32h1.55c1.6,0,2.82,.29,3.67,.88,.85,.58,1.39,1.55,1.69,2.9,.3-1.35,.84-2.31,1.69-2.9,.85-.58,2.07-.88,3.67-.88h1.56v-3.32h0Z"
+              ></path>
+            </svg>
+            {{topic}}
+          </div>
+          <div class="right">
+            <alert :alert="activeAlert"/>
+          </div>
+          
         </div>
-      </transition>
-      <transition name="fade">
-        <div class="sign blue" v-if="activeAlert.line2">
-          <letter v-for="(letter, index) in activeAlert.line2" :key="index" :letter="letter"/>
-        </div>
-      </transition>
-      <transition name="fade">
-        <div class="sign blue small" v-if="activeAlert.line4">
-          <letter v-for="(letter, index) in activeAlert.line4" :key="index" :letter="letter"/>
-        </div>
-      </transition>
-      <transition name="fade">
-        <div class="sign pink" v-if="activeAlert.line3">
-          <letter v-for="(letter, index) in activeAlert.line3" :key="index" :letter="letter"/>
-        </div>
-      </transition>
-    </div>`
+      </div>`
 })
