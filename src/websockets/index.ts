@@ -110,6 +110,7 @@ export class WebSockets {
       (onCreditRollEvent: OnCreditRollEvent) =>
         this.onCreditRoll(onCreditRollEvent),
     );
+
   }
 
   private onChat(onChatMessageEvent: OnChatMessageEvent) {

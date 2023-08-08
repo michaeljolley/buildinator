@@ -1,31 +1,11 @@
 Vue.config.devtools = true;
 
 Vue.component('alert', {
-  template: `<div class="alert" v-if="alert" v-bind:class="{hide: hideMe}">
+  template: `<div class="alert">
   <h2><span>@{{alert.name}}</span>{{alert.message}}</h2>
   <p>{{alert.subtext}}</p>
 </div>`,
-  props: ['letter'],
-  data: function () {
-    return {
-      alert: null,
-      hideMe: false,
-      destroyTimeout: null
-    }
-  },
-  methods: {
-    finish: function () {
-      this.hideMe = true;
-    }
-  },
-  mounted: function () {
-    this.destroyTimeout = setTimeout(() => {
-      this.hideMe = true;
-    }, 5000);
-  },
-  destroyed: function () {
-    clearTimeout(this.destroyTimeout);
-  }
+  props: ['alert'],
 });
 
 const app = new Vue({
@@ -37,13 +17,7 @@ const app = new Vue({
       muted: false,
       activeAudioPlayer: null,
       topic: '',
-      activeAlert: {
-        name: null,
-        message: null,
-        subtext: null,
-        icon: null,
-        audio: null
-      }
+      activeAlert: null
     };
   },
   methods: {
@@ -109,17 +83,18 @@ const app = new Vue({
           audio = this.clipsAudioSrc(nextAlert.data.filename);
           break;
         case 'twitch:follow':
-          message = `<span>${name}</span> just followed the channel`;
+          message = ` just followed the channel`;
           icon = '';
+          audio = this.alertsAudioSrc('ohmy');
           break;
         case 'twitch:sub':
-          message = `just subscribed`;
+          message = ` just subscribed`;
           subtext = "We'll make a donation to Backpack Buddies. Use !bpb to learn more";
           icon = '';
           audio = this.alertsAudioSrc('hair');
           break;
         case 'twich:raid': 
-          message = `just joined in the fun`;
+          message = ` just joined in the fun`;
           subtext = "Welcome raiders!";
           icon = '';
           audio = this.alertsAudioSrc('goodbadugly');
@@ -141,27 +116,21 @@ const app = new Vue({
       this.alerts.shift();
       this.activeAlert = {
         name,
-        message: message ? message : null,
-        subtext: subtext ? subtext : null,
-        icon: icon ? icon : null,
+        message,
+        subtext,
+        icon: icon,
         audio: this.muted ? null : audio
       };
+
       this.playAudio();
 
       setTimeout(() => {
-        this.activeAlert = {
-          name: null,
-          message: null,
-          subtext: null,
-          icon: null,
-          audio: null
-        };
+        this.activeAlert = null;
         this.audio = null;
       }, 5000);
     },
     onInterval() {
-      if (!this.activeAlert.line1 &&
-        !this.activeAlert.audio &&
+      if (!this.activeAlert &&
         this.alerts.length > 0) {
         this.processNextAlert();
       }
@@ -240,7 +209,9 @@ const app = new Vue({
             {{topic}}
           </div>
           <div class="right">
-            <alert :alert="activeAlert"/>
+            <transition name="fade">
+              <alert :alert="activeAlert" v-if="activeAlert"/>
+            </transition>
           </div>
           
         </div>

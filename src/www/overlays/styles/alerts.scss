@@ -23,7 +23,7 @@
   left: 0;
   right: 0;
   height: 100px;
-  background-color: fade-out($dark,  0.2);
+  background-color: fade-out($darkBlue,  0.1);
   font-family: Syne, sans-serif;
   font-size: 1.5rem;
   color: $light;
@@ -60,11 +60,10 @@
       display: flex;
       flex-direction: column;
       align-items: flex-end;
+      font-family: Inter, sans-serif;
 
       .alert {
-        opacity: 0;
         transition: 1s linear all;
-        animation: fadeIn 1s forwards;
 
         &.hide {
           box-shadow: none;
@@ -79,6 +78,7 @@
         padding: 0;
         
         span {
+          font-weight: bold;
           background: $gradient;
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
@@ -92,4 +92,14 @@
       }
     }
   }
+}
+
+.fade-enter {
+  opacity: 0;
+}
+.fade-enter-to {
+  opacity: 1;
+}
+.fade-leave-to {
+  opacity: 0;
 }
