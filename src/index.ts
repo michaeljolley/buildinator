@@ -19,6 +19,8 @@ const config: BuildinatorConfig = {
   DISCORD_GUILD_ID: process.env.DISCORD_GUILD_ID as string,
   DISCORD_CHANNEL_ID_BREW_WITH_ME: process.env
     .DISCORD_CHANNEL_ID_BREW_WITH_ME as string,
+    DISCORD_CHANNEL_ID_MOD_LOG: process.env
+      .DISCORD_CHANNEL_ID_MOD_LOG as string,
   DISCORD_TOKEN: process.env.DISCORD_TOKEN as string,
   PIPEDREAM_UPDATE_DISCORD_EVENT_ID_WEBHOOK: process.env
     .PIPEDREAM_UPDATE_DISCORD_EVENT_ID_WEBHOOK as string,

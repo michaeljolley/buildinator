@@ -2,10 +2,12 @@ import {
   Client,
   GatewayIntentBits,
   Guild,
+  GuildMember,
   GuildScheduledEvent,
   GuildScheduledEventEntityType,
   GuildScheduledEventPrivacyLevel,
   GuildScheduledEventStatus,
+  PartialGuildMember,
   TextChannel,
   VoiceState,
 } from 'discord.js';
@@ -79,7 +81,15 @@ export default abstract class Discord {
   static async registerDiscordEventListeners(): Promise<void> {
     this._client.on(
       'guildScheduledEventUpdate',
-      this.handleGuildScheduledEventUpdate.bind(this),
+      this.guildScheduledEventUpdateHandler.bind(this),
+    );
+    this._client.on(
+      'guildMemberAdd',
+      this.guildMemberAddHandler.bind(this),
+    );
+    this._client.on(
+      'guildMemberRemove',
+      this.guildMemberRemoveHandler.bind(this),
     );
   }
 
@@ -88,7 +98,7 @@ export default abstract class Discord {
    * @param oldGuildScheduledEvent Old version of the scheduled event
    * @param newGuildScheduledEvent Updated version of the scheduled event
    */
-  static async handleGuildScheduledEventUpdate(
+  static async guildScheduledEventUpdateHandler(
     oldGuildScheduledEvent: GuildScheduledEvent<GuildScheduledEventStatus> | null,
     newGuildScheduledEvent: GuildScheduledEvent<GuildScheduledEventStatus>,
   ): Promise<void> {
@@ -300,6 +310,23 @@ export default abstract class Discord {
       log(LogLevel.Error, LogArea.Discord, `gatheringScheduledHandler: ${error}`);
     }
   }
+
+  static async guildMemberAddHandler(member: GuildMember) {
+    await this.discordSayHandler({
+      type: 'guildMemberAdd',
+      channelId: this._config.DISCORD_CHANNEL_ID_MOD_LOG as string,
+      message: `Heyo ${member.nickname || member.user.username} has joined the server! Be sure to welcome them in #general or #introductions.`,
+    })
+  }
+
+  static async guildMemberRemoveHandler(member: GuildMember | PartialGuildMember) {
+    await this.discordSayHandler({
+      type: 'guildMemberRemove',
+      channelId: this._config.DISCORD_CHANNEL_ID_MOD_LOG as string,
+      message: `Goodbye ${member.nickname || member.user.username}! They've left the server.`,
+    })
+  }
+
   /**
    * Sends a message to Discord based on the event payload.
    * @param discordSayEvent An object describing what to say in Discord
