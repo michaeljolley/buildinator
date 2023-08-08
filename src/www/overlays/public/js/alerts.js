@@ -1,7 +1,7 @@
 Vue.config.devtools = true;
 
 Vue.component('alert', {
-  template: `<div class="alert" v-bind:class="{hide: hideMe}">
+  template: `<div class="alert" v-if="alert" v-bind:class="{hide: hideMe}">
   <h2><span>@{{alert.name}}</span>{{alert.message}}</h2>
   <p>{{alert.subtext}}</p>
 </div>`,

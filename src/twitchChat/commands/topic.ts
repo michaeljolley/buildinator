@@ -13,9 +13,8 @@ export function topic(onCommandEvent: OnCommandEvent): void {
 
     const user = onCommandEvent.user;
     const incomingMessage = onCommandEvent.message;
-    const topic = incomingMessage.replace('!topic ', '');
 
     // Send the message to Twitch chat
-    EventBus.eventEmitter.emit(Events.OnSay, new OnTopicEvent(user, topic));
+    EventBus.eventEmitter.emit(Events.OnTopic, new OnTopicEvent(user, incomingMessage));
   }
 }
