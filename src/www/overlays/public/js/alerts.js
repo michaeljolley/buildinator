@@ -1,32 +1,30 @@
 Vue.config.devtools = true;
 
-Vue.component('letter', {
-  template: '<span class="letter" v-bind:class="[assignedClass,{ off: hideMe}]">{{letter}}</span>',
+Vue.component('alert', {
+  template: `<div class="alert" v-bind:class="{hide: hideMe}">
+  <h2><span>@{{alert.name}}</span>{{alert.message}}</h2>
+  <p>{{alert.subtext}}</p>
+</div>`,
   props: ['letter'],
   data: function () {
     return {
+      alert: null,
       hideMe: false,
-      classes: ['', 'flicker', 'fast-flicker', 'fast-flicker2'],
-      assignedClass: null
+      destroyTimeout: null
     }
   },
   methods: {
     finish: function () {
       this.hideMe = true;
-      this.assignedClass = null;
     }
   },
   mounted: function () {
-    setTimeout(() => {
-      const turnOff = Math.floor(Math.random() * 6) + 3;
-
-      const randomClass = Math.floor(Math.random() * 4);
-      if (randomClass !== 0) {
-        this.assignedClass = this.classes[randomClass];
-      }
-
-      setTimeout(this.finish, turnOff * 1000);
-    }, 2500);
+    this.destroyTimeout = setTimeout(() => {
+      this.hideMe = true;
+    }, 5000);
+  },
+  destroyed: function () {
+    clearTimeout(this.destroyTimeout);
   }
 });
 
@@ -88,6 +86,9 @@ const app = new Vue({
     },
     unmuteAudio() {
       this.muted = false;
+    },
+    setTopic(onTopicEvent) {
+      this.topic = onTopicEvent.topic;
     },
     processNextAlert() {
       const nextAlert = this.alerts[0];
@@ -174,6 +175,10 @@ const app = new Vue({
 
     this.socket.on('twitch:sound_effect', onSoundEffectEvent => {
       this.addAlert('twitch:sound_effect', onSoundEffectEvent);
+    });
+
+    this.socket.on('twitch:topic', onTopicEvent => {
+      this.setTopic(onTopicEvent);
     });
 
     this.socket.on('twitch:stop', onStopEvent => {

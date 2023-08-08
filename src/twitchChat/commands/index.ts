@@ -2,6 +2,7 @@ export * from './_soundEffect';
 
 export * from './attention';
 export * from './blog';
+export * from './bpb';
 export * from './clear';
 export * from './conduct';
 export * from './discord';

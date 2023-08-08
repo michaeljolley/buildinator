@@ -15,6 +15,7 @@ import {
   uses,
   youtube,
   clear,
+  bpb,
 } from './commands';
 import {Command} from '../types/command';
 
@@ -26,6 +27,7 @@ export abstract class CommandRegistry {
 
     this.commands.push(new Command('attention', attention));
     this.commands.push(new Command('blog', blog));
+    this.commands.push(new Command('bpb', bpb));
     this.commands.push(new Command('clear', clear));
     this.commands.push(new Command('conduct', conduct));
     this.commands.push(new Command('discord', discord));
