@@ -18,6 +18,7 @@ export * from './stop';
 export * from './store';
 export * from './theme';
 export * from './tiktok';
+export * from './topic';
 export * from './twitter';
 export * from './unmute';
 export * from './uses';

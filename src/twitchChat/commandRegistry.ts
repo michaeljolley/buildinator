@@ -16,6 +16,7 @@ import {
   youtube,
   clear,
   bpb,
+  topic,
 } from './commands';
 import {Command} from '../types/command';
 
@@ -40,6 +41,7 @@ export abstract class CommandRegistry {
     this.commands.push(new Command('stop', stop));
     this.commands.push(new Command('store', store));
     this.commands.push(new Command('theme', theme));
+    this.commands.push(new Command('topic', topic));
     this.commands.push(new Command('twitter', twitter));
     this.commands.push(new Command('youtube', youtube));
   }

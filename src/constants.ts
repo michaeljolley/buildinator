@@ -25,6 +25,7 @@ export enum Events {
   OnStreamEnd = 'twitch:stream_end',
   OnStreamStart = 'twich:stream_start',
   OnSub = 'twitch:sub',
+  OnTopic = 'twitch:topic',
   OnRaid = 'twich:raid',
   OnSay = 'twitch:say',
   OnDonation = 'twitch:donation',
