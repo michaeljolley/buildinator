@@ -18,17 +18,12 @@
   
   display: flex;
   align-items: center;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 100px;
   background-color: fade-out($darkBlue,  0.1);
   font-family: Syne, sans-serif;
   font-size: 1.5rem;
   color: $light;
   
-	border-top: 5px solid;
+	border-top: 8px solid;
   border-image-source: conic-gradient(from var(--angle), $green, $blue, $purple, $pink, $yellow, $orange, $yellow, $pink, $purple, $blue, $green);
   border-image-slice: 1;
   opacity: 1;
@@ -42,34 +37,13 @@
     margin-right:1.5rem;
     width: 100%;
     
-    svg {
-      height: 1.2em;
-      width: 1.2em;
-      color: $light;
-      fill: $light;
-      margin-right: 1rem;
-    }
-    
-    .left {
-      display: flex;
-      align-items: center;
-      font-size: 2rem;
-    }
-    
-    .right, .alert {
+     .alert {
+      opacity: 0;
+      transition: 1s linear all;
       display: flex;
       flex-direction: column;
       align-items: flex-end;
       font-family: Inter, sans-serif;
-
-      .alert {
-        transition: 1s linear all;
-
-        &.hide {
-          box-shadow: none;
-          animation: fadeOut 1s forwards;
-        }
-      }
       
       h2 {
         font-weight: normal;
@@ -94,12 +68,15 @@
   }
 }
 
-.fade-enter {
+.wipe-left-enter {
+  transform: translateX(450px);
   opacity: 0;
 }
-.fade-enter-to {
+.wipe-left-enter-to {
+  transform: translateY(0);
   opacity: 1;
 }
-.fade-leave-to {
+.wipe-left-leave-to {
+  transform: translateX(450px);
   opacity: 0;
 }
