@@ -13,61 +13,59 @@
   inherits: false;
 }
 
-.bar {
-  --angle: 0deg;
-  
+html, body {
+  height: 100%;
+}
+.container {
+  height: 100%;
   display: flex;
+  justify-content: center;
   align-items: center;
-  background-color: fade-out($darkBlue,  0.1);
-  font-family: Syne, sans-serif;
-  font-size: 1.5rem;
-  color: $light;
   
-	border-top: 8px solid;
-  border-image-source: conic-gradient(from var(--angle), $green, $blue, $purple, $pink, $yellow, $orange, $yellow, $pink, $purple, $blue, $green);
-  border-image-slice: 1;
-  opacity: 1;
-  animation: 10s rotate linear infinite;
-  
-  .container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-left: 1.2rem;
-    margin-right:1.5rem;
-    width: 100%;
+  .alert {
+    --angle: 0deg;
     
-     .alert {
-      opacity: 0;
-      transition: 1s linear all;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 0.75rem;
+    flex-direction: column;
+    
+    padding: 1em;
+    min-width: 500px;
+
+    background-color: fade-out($darkBlue,  0.1);
+
+    font-family: Syne, sans-serif;
+    font-size: 1.5rem;
+    color: $light;
+
+    border-top: 8px solid;
+    border-image-source: conic-gradient(from var(--angle), $green, $blue, $purple, $pink, $yellow, $orange, $yellow, $pink, $purple, $blue, $green);
+    border-image-slice: 1;
+    animation: 10s rotate linear infinite;
+    
+    box-shadow: $shadow;
+
+    h2 {
+      font-weight: normal;
+      font-size: 1.4rem;
+      margin: 0;
+      padding: 0;
+
+      span {
+        color: $green;
+      }
+    }
+    p {
       font-family: Inter, sans-serif;
-      
-      h2 {
-        font-weight: normal;
-        font-size: 1.4rem;
-        margin: 0;
-        padding: 0;
-        
-        span {
-          font-weight: bold;
-          background: $gradient;
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-        }
-      }
-      p {
-        font-weight: normal;
-        font-size: 1rem;
-        margin: 0;
-        padding: 0;
-      }
+      font-weight: normal;
+      font-size: 1rem;
+      margin: 0;
+      padding: 0;
     }
   }
 }
-
 .wipe-left-enter {
   transform: translateX(450px);
   opacity: 0;
