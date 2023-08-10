@@ -1,7 +1,7 @@
 Vue.config.devtools = true;
 
 Vue.component('chatMessage', {
-  template: '<div class="message" v-bind:class="{ hide: getOuttaHere || hideMe, highlighted: onChatMessageEvent.flags.highlighted, mod: onChatMessageEvent.flags.mod, vip: onChatMessageEvent.flags.vip }" v-bind:style="{ order: total - ind }"><div class="wrap"><div class="panel"><div class="user" v-bind:style="{ backgroundImage: `url(${onChatMessageEvent.user.avatar_url})` }"></div><div class="bubble"><div v-html="onChatMessageEvent.sanitizedMessage"></div><div class="name">{{onChatMessageEvent.user.display_name}}</div></div></div></div></div>',
+  template: '<div class="message" v-bind:class="{ hide: getOuttaHere || hideMe, highlighted: onChatMessageEvent.flags.highlighted, mod: onChatMessageEvent.flags.mod, vip: onChatMessageEvent.flags.vip }" v-bind:style="{ order: total - ind }"><div class="wrap"><div class="panel"><div class="bubble"><div v-html="onChatMessageEvent.sanitizedMessage"></div><div class="name">{{onChatMessageEvent.user.display_name}}</div></div></div></div></div>',
   props: ['ind', 'onChatMessageEvent', 'total', 'getOuttaHere'],
   data: function () {
     return {

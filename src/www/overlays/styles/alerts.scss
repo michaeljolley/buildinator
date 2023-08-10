@@ -13,15 +13,11 @@
   inherits: false;
 }
 
-html, body {
-  height: 100%;
-}
 .container {
-  height: 100%;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  
+  margin: 2rem;
+  justify-content: flex-end;
+
   .alert {
     --angle: 0deg;
     
@@ -32,9 +28,9 @@ html, body {
     flex-direction: column;
     
     padding: 1em;
-    min-width: 500px;
+    padding-left: 8rem;
 
-    background-color: fade-out($darkBlue,  0.1);
+    background-color: fade-out($darkBlue, 0.1);
 
     font-family: Syne, sans-serif;
     font-size: 1.5rem;
@@ -44,12 +40,13 @@ html, body {
     border-image-source: conic-gradient(from var(--angle), $green, $blue, $purple, $pink, $yellow, $orange, $yellow, $pink, $purple, $blue, $green);
     border-image-slice: 1;
     animation: 10s rotate linear infinite;
+    transition: all 0.25s ease-in-out;
     
     box-shadow: $shadow;
 
     h2 {
-      font-weight: normal;
-      font-size: 1.4rem;
+      font-weight: 700;
+      font-size: 1.5rem;
       margin: 0;
       padding: 0;
 
@@ -67,7 +64,7 @@ html, body {
   }
 }
 .wipe-left-enter {
-  transform: translateX(450px);
+  transform: translateX(250px);
   opacity: 0;
 }
 .wipe-left-enter-to {
@@ -75,6 +72,6 @@ html, body {
   opacity: 1;
 }
 .wipe-left-leave-to {
-  transform: translateX(450px);
+  transform: translateX(250px);
   opacity: 0;
 }

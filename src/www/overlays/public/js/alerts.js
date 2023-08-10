@@ -1,7 +1,7 @@
 Vue.config.devtools = true;
 
 Vue.component('alert', {
-  template: `<div class="alert">
+  template: `<div class="alert" v-if="alert.name">
   <h2><span>@{{alert.name}}</span>{{alert.message}}</h2>
   <p>{{alert.subtext}}</p>
 </div>`,
@@ -181,6 +181,12 @@ const app = new Vue({
     console.log("We're loaded and listening the socket.io hub");
 
     setInterval(this.onInterval, 2000);
+
+    // this.addAlert('twitch:follow', {
+    //     user: {
+    //       display_name: 'CodeWithDan'
+    //     }
+    // });
   },
   template:
     `<div class="container">

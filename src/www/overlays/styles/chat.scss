@@ -1,181 +1,185 @@
 @import "main";
 
-// .chat {
+.chat {
     
-//   --angle: 90deg;
+  --angle: 90deg;
 
-//   display: flex;
-//   flex-direction: column-reverse;
-//   height: 98vh;
-//   position: absolute;
-//   right: 0;
-//   width: 400px;
+  display: flex;
+  flex-direction: column-reverse;
+  height: 98vh;
+  position: absolute;
+  right: 2rem;
+  width: 400px;
 
-//   .list-move {
-//     transition: transform .5s;
-//   }
+  .list-move {
+    transition: transform .5s;
+  }
 
-//   .message {
-//     width: 100%;
-//     margin-bottom: 25px;
-//     position: relative;
-//     display: flex;
-//     align-items: center;
+  .message {
+    width: 100%;
+    margin-bottom: 25px;
+    position: relative;
+    display: flex;
+    align-items: center;
     
-//     box-shadow: -0.5em 0.6em 1em -0.4em $darkblue;
+    box-shadow: $shadow;
     
-//     opacity: 0;
-//     transition: 1s linear all;
-//     animation: fade 1s forwards;
+    opacity: 0;
+    transition: 1s linear all;
+    animation: fade 1s forwards;
 
-//     &.hide {
-//       box-shadow: none;
-//       animation: hide 1s forwards;
-//     }
+    &.hide {
+      box-shadow: none;
+      animation: hide 1s forwards;
+    }
 
-//     .wrap {
-//       opacity: 1;
-//       animation: high 1s linear;
+    .wrap {
+      opacity: 1;
+      animation: high 1s linear;
 
-//       .panel {
-//         display: flex;
-//         flex-direction: row-reverse;
-//         width: 400px;
-//         background-color: $darkblue;
+      .panel {
+        display: flex;
+        width: 400px;
+        background-color: $darkBlue;
         
-//         border-top: 5px solid;
-//         border-image-source: linear-gradient(var(--angle), #f0f 0%, cyan 100%);
-//         border-image-slice: 1;
+        border-top: 5px solid;
+        border-image-source: conic-gradient(from var(--angle), $green, $blue, $purple, $pink, $yellow, $orange, $yellow, $pink, $purple, $blue, $green);
+        border-image-slice: 1;
+        animation: 10s rotate linear infinite;
         
-//         animation: 10s rotate linear infinite; 
-        
-//         .bubble {
-//           padding: 15px;
-//           width: 340px;
-//           word-wrap: break-word;
-//           white-space: pre-line;
-  
-//           display: flex;
-//           flex-direction: column;
+        .bubble {
+          padding: 1rem;
           
-//           font-size: 1.2em;
-//           color: $white;
+          word-wrap: break-word;
+          white-space: pre-line;
   
-//           span {
-//             color: $neonpink;
-//           }
+          display: flex;
+          flex-direction: column;
           
-//           .name {
-//             font-family: 'Roboto';
-//             font-size: .8em;
-//             font-weight: bold;
-//             background: $gradient;
-//             background-clip: text;
-//             margin-top: 10px;
-//             -webkit-background-clip: text;
-//             -webkit-text-fill-color: transparent;
-//           }
-//         }
+          font-size: 1.2em;
+          color: $light;
+  
+          span {
+            color: $green;
+          }
+          
+          .name {
+            font-family: 'Roboto';
+            font-size: .8em;
+            font-weight: bold;
+            margin-top: 10px;
+            color: $orange;
+            // background: $gradient;
+            // background-clip: text;
+            // -webkit-background-clip: text;
+            // -webkit-text-fill-color: transparent;
+          }
+        }
     
-//         .user {
-//           width: 60px;
-//           background-size: cover;
-//           background-position: center;
-//           background-repeat: no-repeat;
-//           background-position-y: bottom;
-//           background-color: $white;
-//         }    
-//       }
-//     }
+        .user {
+          width: 60px;
+          background-size: cover;
+          background-position: center;
+          background-repeat: no-repeat;
+          background-position-y: bottom;
+          background-color: $light;
+        }    
+      }
+    }
     
-//     &.mod .wrap .panel {
-//       background-color: $lightgray;
-//       .bubble {
-//         color: $darkblue;
-//       }
-//     }
+    // &.mod .wrap .panel {
+      
+    //   .bubble {
+    //   //  color: $yellow;
+
+    //     span {
+    //     //    color: $green;
+    //     }
+    //   }
+    // }
  
-//     &.vip .wrap .panel {
-//       background-color: $white;
-//       .bubble {
-//         color: $darkblue;
-//       }
-//     }
+    &.vip .wrap .panel {
+      background-color: $light;
+      .bubble {
+        color: $darkBlue;
+      }
+    }
 
-//     &.highlighted .wrap .panel {
-//       background-color: black;
-//       border: 5px solid;
-//       border-right: 0px;
-//       border-image-source: linear-gradient(var(--angle), #f0f 0%, cyan 100%);
-//       border-image-slice: 1;
+    &.highlighted .wrap .panel {
+      background-color: $darkBlue;
+      border: 5px solid;
+      border-right: 0px;
+      border-image-source: conic-gradient(from var(--angle), $green, $blue, $purple, $pink, $yellow, $orange, $yellow, $pink, $purple, $blue, $green);
+      border-image-slice: 1;
+      animation: 10s rotate linear infinite;
 
-//       .bubble {
-//         color: $white;
-//       }
+      .bubble {
+        color: $light;
+      }
 
-//       &:before {
-//         content: "";
-//         position: absolute;
-//         inset: -5px;
-//         transform: translate3d(0px, 0px, 0px); /* (X, Y, Z) */
-//         border: 8px solid;
-//         border-image-source: linear-gradient(var(--angle), #f0f 0%, cyan 100%); 
-//         border-image-slice: 1;
-//         filter: blur(8px);
-//         animation: 10s rotate linear infinite;
-//       }
-//     }
-//   }
+      &:before {
+        content: "";
+        position: absolute;
+        inset: -5px;
+        transform: translate3d(0px, 0px, 0px); /* (X, Y, Z) */
+        border: 8px solid;
+        border-image-source: conic-gradient(from var(--angle), $green, $blue, $purple, $pink, $yellow, $orange, $yellow, $pink, $purple, $blue, $green);
+        border-image-slice: 1;
+        filter: blur(8px);
+        animation: 10s rotate linear infinite;
+      }
+    }
+  }
   
-//   &.fade .message:not(.highlighted) .wrap {
-//     opacity: .6;
-//     animation: low 1s forwards;
-//   }
-// }
+  &.fade .message:not(.highlighted) .wrap {
+    opacity: .6;
+    animation: low 1s forwards;
+  }
+}
 
-// @keyframes fade {
-//   0% {
-//     opacity: 0;
-//   }
-//   100% {
-//     opacity: 1;
-//   }
-// }
+@keyframes fade {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
 
-// @keyframes hide {
-//   0% {
-//     opacity: 1;
-//   }
-//   100% {
-//     opacity: 0;
-//   }
-// }
+@keyframes hide {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
 
-// @keyframes low {
-//   0% {
-//     opacity: 1;
-//   }
-//   100% {
-//     opacity: .6;
-//   }
-// } 
-// @keyframes high {
-//   0% {
-//     opacity: .6;
-//   }
-//   100% {
-//     opacity: 1;
-//   }
-// } 
+@keyframes low {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: .6;
+  }
+} 
+@keyframes high {
+  0% {
+    opacity: .6;
+  }
+  100% {
+    opacity: 1;
+  }
+} 
 
-// @keyframes rotate {
-//   to {
-//     --angle: 360deg;
-//   }
-// }
+@keyframes rotate {
+  to {
+    --angle: 360deg;
+  }
+}
 
-// @property --angle {
-//   syntax: '<angle>';
-//   initial-value: 0deg;
-//   inherits: false;
-// }
+@property --angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
