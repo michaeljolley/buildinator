@@ -11,6 +11,7 @@ import { BuildinatorConfig } from './types/buildinatorConfig';
 import { LogArea, LogLevel, log } from './log';
 import TwitchAPI from './twitchAPI';
 import { WebSockets } from './websockets';
+import { Logger } from './logger';
 
 const config: BuildinatorConfig = {
   ORBIT_API_KEY: process.env.ORBIT_API_KEY as string,
@@ -19,7 +20,7 @@ const config: BuildinatorConfig = {
   DISCORD_GUILD_ID: process.env.DISCORD_GUILD_ID as string,
   DISCORD_CHANNEL_ID_BREW_WITH_ME: process.env
     .DISCORD_CHANNEL_ID_BREW_WITH_ME as string,
-    DISCORD_CHANNEL_ID_MOD_LOG: process.env
+  DISCORD_CHANNEL_ID_MOD_LOG: process.env
       .DISCORD_CHANNEL_ID_MOD_LOG as string,
   DISCORD_TOKEN: process.env.DISCORD_TOKEN as string,
   PIPEDREAM_UPDATE_DISCORD_EVENT_ID_WEBHOOK: process.env
@@ -54,6 +55,7 @@ server.listen(config.WWW_PORT, () =>
   ),
 );
 
+Logger.init(config);
 TwitchAPI.init(config);
 TwitchChat.init(config);
 

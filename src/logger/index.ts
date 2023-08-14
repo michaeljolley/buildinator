@@ -3,7 +3,6 @@ import {EventBus} from '../events';
 import {Orbit} from '../orbit';
 import TwitchAPI from '../twitchAPI';
 import {BuildinatorConfig} from '../types/buildinatorConfig';
-import {OnChatMessageEvent} from '../types/events/onChatMessageEvent';
 import {OnCheerEvent} from '../types/events/onCheerEvent';
 import {OnFollowEvent} from '../types/events/onFollowEvent';
 import {OnJoinEvent} from '../types/events/onJoinEvent';

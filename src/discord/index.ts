@@ -312,6 +312,7 @@ export default abstract class Discord {
   }
 
   static async guildMemberAddHandler(member: GuildMember) {
+    log(LogLevel.Info, LogArea.Discord, `${member.nickname || member.user.username} has joined the server!`)
     await this.discordSayHandler({
       type: 'guildMemberAdd',
       channelId: this._config.DISCORD_CHANNEL_ID_MOD_LOG as string,
@@ -320,6 +321,7 @@ export default abstract class Discord {
   }
 
   static async guildMemberRemoveHandler(member: GuildMember | PartialGuildMember) {
+    log(LogLevel.Info, LogArea.Discord, `${member.nickname || member.user.username} has left the server!`)
     await this.discordSayHandler({
       type: 'guildMemberRemove',
       channelId: this._config.DISCORD_CHANNEL_ID_MOD_LOG as string,

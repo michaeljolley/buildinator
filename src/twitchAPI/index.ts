@@ -19,6 +19,7 @@ import { WebSocket, MessageEvent } from 'ws';
 export default abstract class TwitchAPI {
   private static _config: BuildinatorConfig;
   private static client: WebSocket;
+  private static api: API;
 
   static init(config: BuildinatorConfig) {
     this._config = config;
@@ -27,6 +28,8 @@ export default abstract class TwitchAPI {
       Events.GatheringScheduled,
       this.gatheringScheduledHandler.bind(this),
     );
+
+    this.api = new API(this._config);
 
     this.client = new WebSocket('wss://eventsub.wss.twitch.tv/ws');
 
@@ -96,7 +99,7 @@ export default abstract class TwitchAPI {
   ) {
     let userInfo: User | undefined;
     try {
-      userInfo = await TwitchAPI.getUser(parseInt(twitchFollowEvent.user_id));
+      userInfo = await this.api.getUser(parseInt(twitchFollowEvent.user_id));
     } catch (err) {
       log(LogLevel.Error, LogArea.TwitchAPI, `/follow - ${err}`);
     }
@@ -112,7 +115,7 @@ export default abstract class TwitchAPI {
 
   private static async clientHandleStreamOffline() {
     const streamDate = new Date().toLocaleDateString('en-US');
-    const stream = await TwitchAPI.getStream(streamDate);
+    const stream = await this.api.getStream(streamDate);
     log(LogLevel.Info, LogArea.TwitchAPI, `WS Stream Offline: ${streamDate}`);
     this.emit(Events.OnStreamEnd, { stream } as OnStreamEvent);
   }
@@ -126,7 +129,7 @@ export default abstract class TwitchAPI {
         streamOnlineEvent.started_at,
       ).toLocaleDateString('en-US');
       try {
-        stream = await TwitchAPI.getStream(streamDate);
+        stream = await this.api.getStream(streamDate);
       } catch (err) {
         log(
           LogLevel.Error,
@@ -142,8 +145,7 @@ export default abstract class TwitchAPI {
   static async registerWebSocketSubscriptions(
     sessionId: string,
   ): Promise<void> {
-    const api = new API(this._config);
-    await api.registerWebSocketSubscriptions(sessionId);
+    await this.api.registerWebSocketSubscriptions(sessionId);
   }
 
   /**
@@ -160,7 +162,7 @@ export default abstract class TwitchAPI {
     if (!stream) {
       let apiStream: Stream | undefined;
       try {
-        apiStream = await TwitchAPI.getStream(streamDate);
+        apiStream = await this.api.getStream(streamDate);
       } catch (err) {
         log(
           LogLevel.Error,
@@ -195,8 +197,7 @@ export default abstract class TwitchAPI {
     if (!user || !user.lastUpdated || user.lastUpdated < date) {
       let apiUser: User | undefined;
       try {
-        const twitchAPI = new API(this._config);
-        apiUser = await twitchAPI.getUser(id);
+        apiUser = await this.api.getUser(id);
       } catch (err) {
         log(LogLevel.Error, LogArea.TwitchAPI, `getUser: ${err}`);
       }
@@ -224,14 +225,13 @@ export default abstract class TwitchAPI {
         gathering.type === NOTION_EVENT_TYPE_TWITCH
       ) {
         if (gathering.releaseDateStart) {
-          const twitchAPI = new API(this._config);
           // If the Notion event has a `twitchEventId`, we've already created
           // it in Twitch. In that event, we need to update/delete the event
           // in Twitch.
           !gathering.twitchEventId ||
           gathering.twitchEventId?.length === 0
-            ? await twitchAPI.createScheduledStream(gathering)
-            : await twitchAPI.updateScheduledStream(gathering);
+            ? await this.api.createScheduledStream(gathering)
+            : await this.api.updateScheduledStream(gathering);
         }
       }
     }
