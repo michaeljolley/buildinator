@@ -10,13 +10,13 @@ import {
   sfx,
   store,
   stop,
-  theme,
   twitter,
   uses,
   youtube,
   clear,
   bpb,
   topic,
+  brainDump,
 } from './commands';
 import {Command} from '../types/command';
 
@@ -29,6 +29,7 @@ export abstract class CommandRegistry {
     this.commands.push(new Command('attention', attention));
     this.commands.push(new Command('blog', blog));
     this.commands.push(new Command('bpb', bpb));
+    this.commands.push(new Command('braindump', brainDump));
     this.commands.push(new Command('clear', clear));
     this.commands.push(new Command('conduct', conduct));
     this.commands.push(new Command('discord', discord));
@@ -40,7 +41,6 @@ export abstract class CommandRegistry {
     this.commands.push(new Command('sfx', sfx));
     this.commands.push(new Command('stop', stop));
     this.commands.push(new Command('store', store));
-    this.commands.push(new Command('theme', theme));
     this.commands.push(new Command('topic', topic));
     this.commands.push(new Command('twitter', twitter));
     this.commands.push(new Command('youtube', youtube));

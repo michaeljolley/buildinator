@@ -4,10 +4,10 @@ import {Events} from '../../constants';
 import {ShouldThrottle} from '../shouldThrottle';
 import {EventBus} from '../../events';
 /**
- * Sends a message to chat with a link to Michael's GitHub profile
+ * Sends a message to chat with a link to signup for the Brain Dump newsletter
  * @param onCommandEvent
  */
-export function gitHub(onCommandEvent: OnCommandEvent): void {
+export function brainDump(onCommandEvent: OnCommandEvent): void {
   const cooldownSeconds = 300;
 
   // The broadcaster is allowed to bypass throttling. Otherwise,
@@ -19,7 +19,7 @@ export function gitHub(onCommandEvent: OnCommandEvent): void {
     return;
   }
 
-  const message = `All of our code can be found at https://github.com/build-with-me`;
+  const message = `You can subscribe to the Brain Dump newsletter at https://bbb.dev/braindump`;
 
   // Send the message to Twitch chat
   EventBus.eventEmitter.emit(Events.OnSay, new OnSayEvent(message));
