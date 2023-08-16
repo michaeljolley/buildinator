@@ -40,7 +40,7 @@
       .panel {
         display: flex;
         width: 400px;
-        background-color: $darkBlue;
+        background-color: $darkBlueFade;
         
         border-top: 5px solid;
         border-image-source: conic-gradient(from var(--angle), $green, $blue, $purple, $pink, $yellow, $orange, $yellow, $pink, $purple, $blue, $green);
