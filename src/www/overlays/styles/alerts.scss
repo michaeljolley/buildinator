@@ -37,7 +37,7 @@
     color: $light;
 
     border-top: 8px solid;
-    border-image-source: conic-gradient(from var(--angle), $green, $blue, $purple, $pink, $yellow, $orange, $yellow, $pink, $purple, $blue, $green);
+    border-image-source: $gradient-conic;
     border-image-slice: 1;
     animation: 10s rotate linear infinite;
     transition: all 0.25s ease-in-out;

@@ -8,7 +8,7 @@
   flex-direction: column-reverse;
   height: 98vh;
   position: absolute;
-  right: 2rem;
+  right: 100px;
   width: 400px;
 
   .list-move {
@@ -22,7 +22,7 @@
     display: flex;
     align-items: center;
     
-    //box-shadow: $shadow;
+    box-shadow: $shadow;
     
     opacity: 0;
     transition: 1s linear all;
@@ -43,7 +43,7 @@
         background-color: $darkBlueFade;
         
         border-top: 5px solid;
-        border-image-source: conic-gradient(from var(--angle), $green, $blue, $purple, $pink, $yellow, $orange, $yellow, $pink, $purple, $blue, $green);
+        border-image-source: $gradient-conic-silver;
         border-image-slice: 1;
         animation: 10s rotate linear infinite;
         
@@ -70,42 +70,30 @@
             font-weight: bold;
             margin-top: 10px;
             color: $orange;
-           
           }
         }
-    
-        .user {
-          width: 60px;
-          background-size: cover;
-          background-position: center;
-          background-repeat: no-repeat;
-          background-position-y: bottom;
-          background-color: $light;
-        }    
       }
     }
     
-    // &.mod .wrap .panel {
-      
-    //   .bubble {
-    //   //  color: $yellow;
-
-    //     span {
-    //     //    color: $green;
-    //     }
-    //   }
-    // }
+    &.mod .wrap .panel {
+      // background-image: url('data:image/svg+xml;utf8,<svg width="98" height="98" viewBox="0 0 98 98" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M75.7315 11.3607H86.6385L35.5118 62.4839L29.8311 57.1444M1.65459 91.5673L6.42641 96.3388C6.95195 96.8654 7.5762 97.2832 8.26342 97.5682C8.95064 97.8533 9.68733 98 10.4313 98C11.1753 98 11.912 97.8533 12.5993 97.5682C13.2865 97.2832 13.9107 96.8654 14.4363 96.3388L32.1602 78.6161L47.3846 93.7259L55.3944 85.7166L47.3278 77.6505L98 26.9817V0H71.0165L20.3442 50.6688L12.2776 42.6027L4.26773 50.612L19.4353 65.7785L1.71139 83.5012C-0.560907 85.7734 -0.560898 89.352 1.65459 91.5673Z" style="fill:rgba(255, 255, 255, .03);"/></svg>');
+      // background-repeat: no-repeat;
+      // background-position: 97% bottom;
+    }
  
     &.vip .wrap .panel {
-      background-color: fade-out($light, 0.9);
+      border-image-source: $gradient-conic;
+       
       .bubble {
         color: $light;
 
         .name {
           background: $gradient;
+          background-size: 300%;
           background-clip: text;
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
+          animation: animated_text 10s ease-in-out infinite;
         }
       }
     }
@@ -113,8 +101,7 @@
     &.highlighted .wrap .panel {
       background-color: $darkBlue;
       border: 5px solid;
-      border-right: 0px;
-      border-image-source: conic-gradient(from var(--angle), $green, $blue, $purple, $pink, $yellow, $orange, $yellow, $pink, $purple, $blue, $green);
+      border-image-source: $gradient-conic;
       border-image-slice: 1;
       animation: 10s rotate linear infinite;
 
@@ -123,9 +110,9 @@
 
         .name {
           background: $gradient;
+          background-size: 300%;
           background-clip: text;
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
+          animation: animated_text 10s ease-in-out infinite;
         }
       }
 
@@ -135,7 +122,7 @@
         inset: -5px;
         transform: translate3d(0px, 0px, 0px); /* (X, Y, Z) */
         border: 8px solid;
-        border-image-source: conic-gradient(from var(--angle), $green, $blue, $purple, $pink, $yellow, $orange, $yellow, $pink, $purple, $blue, $green);
+        border-image-source: $gradient-conic;
         border-image-slice: 1;
         filter: blur(8px);
         animation: 10s rotate linear infinite;
