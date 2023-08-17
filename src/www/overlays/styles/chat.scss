@@ -97,12 +97,15 @@
     // }
  
     &.vip .wrap .panel {
-      background-color: fade-out($light, 0.8);
+      background-color: fade-out($light, 0.9);
       .bubble {
-        color: $darkBlue;
+        color: $light;
 
         .name {
-          
+          background: $gradient;
+          background-clip: text;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
         }
       }
     }
