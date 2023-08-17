@@ -30,7 +30,7 @@
     padding: 1em;
     padding-left: 8rem;
 
-    background-color: fade-out($darkBlue, 0.1);
+    background-color: $darkBlueFade;
 
     font-family: Syne, sans-serif;
     font-size: 1.5rem;
@@ -42,7 +42,7 @@
     animation: 10s rotate linear infinite;
     transition: all 0.25s ease-in-out;
     
-    box-shadow: $shadow;
+    //box-shadow: $shadow;
 
     h2 {
       font-weight: 700;
