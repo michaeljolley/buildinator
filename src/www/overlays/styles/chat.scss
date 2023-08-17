@@ -70,10 +70,7 @@
             font-weight: bold;
             margin-top: 10px;
             color: $orange;
-            // background: $gradient;
-            // background-clip: text;
-            // -webkit-background-clip: text;
-            // -webkit-text-fill-color: transparent;
+           
           }
         }
     
@@ -100,9 +97,13 @@
     // }
  
     &.vip .wrap .panel {
-      background-color: $light;
+      background-color: fade-out($light, 0.8);
       .bubble {
         color: $darkBlue;
+
+        .name {
+          
+        }
       }
     }
 
@@ -116,6 +117,13 @@
 
       .bubble {
         color: $light;
+
+        .name {
+          background: $gradient;
+          background-clip: text;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
       }
 
       &:before {
