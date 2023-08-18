@@ -19,6 +19,9 @@ import { BUILD_WITH_ME_DISCORD_EVENT_COVER_IMAGE } from './BUILD_WITH_ME_DISCORD
 import { LogArea, LogLevel, log } from '../log';
 import { Orbit } from '../orbit';
 import { BuildinatorConfig } from '../types/buildinatorConfig';
+import { GatheringEvent } from '../types/gatheringEvent';
+import { DiscordSayEvent } from '../types/discordSayEvent';
+import { GitHubPullRequestEvent } from '../types/githubPullRequestEvent';
 
 const DISCORD_INTENTS = [
   GatewayIntentBits.Guilds,
