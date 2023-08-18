@@ -15,13 +15,10 @@ import { titleCase } from 'title-case';
 import { EventBus } from '../events';
 import { Events, NOTION_EVENT_TYPE_BREW_WITH_ME, NOTION_EVENT_TYPE_TWITCH, OrbitActivities } from '../constants';
 import { GatheringAttendee } from '../types/gatheringAttendee';
-import { GatheringEvent } from '../types/gatheringEvent';
 import { BUILD_WITH_ME_DISCORD_EVENT_COVER_IMAGE } from './BUILD_WITH_ME_DISCORD_EVENT_COVER_IMAGE';
 import { LogArea, LogLevel, log } from '../log';
-import { GitHubPullRequestEvent } from '../types/githubPullRequestEvent';
 import { Orbit } from '../orbit';
 import { BuildinatorConfig } from '../types/buildinatorConfig';
-import { DiscordSayEvent } from '../types/discordSayEvent';
 
 const DISCORD_INTENTS = [
   GatewayIntentBits.Guilds,
@@ -194,6 +191,7 @@ export default abstract class Discord {
               activity_type: 'buildinator',
               activity_type_key: OrbitActivities.BrewWithMe,
               link: `https://discord.com/channels/${this._config.DISCORD_GUILD_ID}/${this._config.DISCORD_CHANNEL_ID_BREW_WITH_ME}`,
+              key: `discord:brew_with_me:${member.id}:${new Date().toISOString().slice(0, 10).replace('-', '.')}}`,
             },
             {
               uid: member.id,
