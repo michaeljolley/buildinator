@@ -41,6 +41,7 @@ export abstract class Logger {
     title: string,
     description: string,
     eventType: UserEventType,
+    key: string,
   ): OrbitActivity {
     return {
       title,
@@ -48,7 +49,13 @@ export abstract class Logger {
       activity_type: 'buildinator',
       activity_type_key: `twitch:${eventType}`,
       link: 'https://twitch.tv/baldbeardedbuilder',
+      key
     };
+  }
+
+  private static getDate(): string {
+    const date = new Date();
+    return date.toISOString().slice(0, 10).replace('-', '.');
   }
 
   private static async onJoin(event: OnJoinEvent) {
@@ -59,6 +66,7 @@ export abstract class Logger {
           'Joined stream',
           'Joined the Twitch stream',
           event.type,
+          `twitch:${event.type}:${event.user.id}:${this.getDate()}}`
         ),
         this.createTwitchIdentity(event),
       );
@@ -75,6 +83,7 @@ export abstract class Logger {
         `Cheered on Twitch`,
         `Cheered ${event.bits} bits on Twitch`,
         event.type,
+        `twitch:${event.type}:${event.user.id}:${Date.now().toString()}}`
       ),
       this.createTwitchIdentity(event),
     );
@@ -86,6 +95,7 @@ export abstract class Logger {
         `Subscribed on Twitch`,
         `Subscribed at ${event.subTierInfo} level on Twitch`,
         event.type,
+        `twitch:${event.type}:${event.user.id}:${this.getDate()}}`
       ),
       this.createTwitchIdentity(event),
     );
@@ -97,6 +107,7 @@ export abstract class Logger {
         `Raided on Twitch`,
         `Raided with ${event.viewers} on Twitch`,
         event.type,
+        `twitch:${event.type}:${event.user.id}:${this.getDate()}}`
       ),
       this.createTwitchIdentity(event),
     );
@@ -108,6 +119,7 @@ export abstract class Logger {
         `Followed on Twitch`,
         `Followed on Twitch`,
         event.type,
+        `twitch:${event.type}:${event.user.id}:${this.getDate()}}`
       ),
       this.createTwitchIdentity(event),
     );

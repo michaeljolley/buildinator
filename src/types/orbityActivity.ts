@@ -5,4 +5,5 @@ export type OrbitActivity = {
   link_text?: string;
   activity_type: string;
   activity_type_key: string;
+  key: string;
 };
