@@ -1,9 +1,9 @@
-import {EventBus} from '../events';
-import {Command} from '../types/command';
-import {OnCommandEvent} from '../types/events/onCommandEvent';
-import {Events} from '../constants';
-import {CommandRegistry} from './commandRegistry';
-import {_SoundEffect} from './commands';
+import { EventBus } from '../events';
+import { Command } from '../types/command';
+import { OnCommandEvent } from '../types/events/onCommandEvent';
+import { Events } from '../constants';
+import { CommandRegistry } from './commandRegistry';
+import _SoundEffect from './commands/_soundEffect';
 
 export class CommandMonitor {
   constructor() {

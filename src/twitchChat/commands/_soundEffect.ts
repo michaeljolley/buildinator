@@ -1,15 +1,15 @@
 import fs from 'fs';
-import {Events} from '../../constants';
-import {EventBus} from '../../events';
-import {ShouldThrottle} from '../shouldThrottle';
-import {OnCommandEvent} from '../../types/events/onCommandEvent';
-import {OnSoundEffectEvent} from '../../types/events/onSoundEffectEvent';
+import { Events } from '../../constants';
+import { EventBus } from '../../events';
+import { ShouldThrottle } from '../shouldThrottle';
+import { OnCommandEvent } from '../../types/events/onCommandEvent';
+import { OnSoundEffectEvent } from '../../types/events/onSoundEffectEvent';
 
 /**
  * Determines if the command is an audio clip and attempts to play if so
  * @param onCommandEvent
  */
-export function _SoundEffect(onCommandEvent: OnCommandEvent): void {
+export default function (onCommandEvent: OnCommandEvent): void {
   const cooldownSeconds = 60;
 
   // The broadcaster & mods are allowed to bypass throttling. Otherwise,

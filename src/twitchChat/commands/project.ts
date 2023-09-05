@@ -1,8 +1,8 @@
-import {OnCommandEvent} from '../../types/events/onCommandEvent';
-import {OnSayEvent} from '../../types/events/onSayEvent';
-import {Events} from '../../constants';
-import {ShouldThrottle} from '../shouldThrottle';
-import {EventBus} from '../../events';
+import { OnCommandEvent } from '../../types/events/onCommandEvent';
+import { OnSayEvent } from '../../types/events/onSayEvent';
+import { Events } from '../../constants';
+import { ShouldThrottle } from '../shouldThrottle';
+import { EventBus } from '../../events';
 
 let projectValue = "We're doing that voodoo that we do. Like and subscribe!";
 
@@ -11,7 +11,7 @@ let projectValue = "We're doing that voodoo that we do. Like and subscribe!";
  * sets the value of the project we're working on.
  * @param onCommandEvent
  */
-export function project(onCommandEvent: OnCommandEvent): void {
+export default function (onCommandEvent: OnCommandEvent): void {
   const cooldownSeconds = 300;
 
   // The broadcaster is allowed to bypass throttling. Otherwise,

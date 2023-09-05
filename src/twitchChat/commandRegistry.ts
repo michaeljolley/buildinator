@@ -1,24 +1,7 @@
-import {
-  attention,
-  blog,
-  conduct,
-  discord,
-  gitHub,
-  help,
-  instagram,
-  project,
-  sfx,
-  store,
-  stop,
-  twitter,
-  uses,
-  youtube,
-  clear,
-  bpb,
-  topic,
-  brainDump,
-} from './commands';
-import {Command} from '../types/command';
+import * as path from 'path';
+import * as fs from 'fs';
+import { Command } from '../types/command';
+import { OnCommandEvent } from '../types/events/onCommandEvent';
 
 export abstract class CommandRegistry {
   private static commands: Array<Command> = [];
@@ -26,24 +9,17 @@ export abstract class CommandRegistry {
   public static init(): void {
     this.commands = [];
 
-    this.commands.push(new Command('attention', attention));
-    this.commands.push(new Command('blog', blog));
-    this.commands.push(new Command('bpb', bpb));
-    this.commands.push(new Command('braindump', brainDump));
-    this.commands.push(new Command('clear', clear));
-    this.commands.push(new Command('conduct', conduct));
-    this.commands.push(new Command('discord', discord));
-    this.commands.push(new Command('github', gitHub));
-    this.commands.push(new Command('uses', uses));
-    this.commands.push(new Command('help', help));
-    this.commands.push(new Command('instagram', instagram));
-    this.commands.push(new Command('project', project));
-    this.commands.push(new Command('sfx', sfx));
-    this.commands.push(new Command('stop', stop));
-    this.commands.push(new Command('store', store));
-    this.commands.push(new Command('topic', topic));
-    this.commands.push(new Command('twitter', twitter));
-    this.commands.push(new Command('youtube', youtube));
+    const commandsPath = path.join(__dirname, 'commands');
+    const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+
+    for (const file of commandFiles) {
+      const filePath = path.join(commandsPath, file);
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const command = require(filePath).default
+      if (!filePath.includes('_')) {
+        this.commands.push(new Command(file.split('.')[0].toLocaleLowerCase(), command as unknown as (onCommandEvent: OnCommandEvent) => void));
+      }
+    }
   }
 
   public static getCommand(commandName: string): Command | undefined {

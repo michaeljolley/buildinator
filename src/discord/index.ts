@@ -1,5 +1,8 @@
+import * as path from 'path';
+import * as fs from 'fs';
 import {
   Client,
+  Collection,
   GatewayIntentBits,
   Guild,
   GuildMember,
@@ -10,6 +13,9 @@ import {
   PartialGuildMember,
   TextChannel,
   VoiceState,
+  Events as DiscordEvents,
+  REST,
+  Routes
 } from 'discord.js';
 import { titleCase } from 'title-case';
 import { EventBus } from '../events';
@@ -34,13 +40,20 @@ const DISCORD_INTENTS = [
   GatewayIntentBits.GuildScheduledEvents,
 ];
 
+class DiscordClient extends Client {
+  commands: Collection<string, {
+    data: any,
+    command: { execute: (interaction: any) => Promise<void> }
+  }> = new Collection();
+}
+
 /**
  * The Discord class is static for the entire application. It is responsible for
  * listening to events in Discord and raising them to the EventBus. It also
  * listens to events in the EventBus in order to update Discord.
  */
 export default abstract class Discord {
-  private static _client = new Client({
+  private static _client = new DiscordClient({
     intents: DISCORD_INTENTS,
   });
 
@@ -52,9 +65,24 @@ export default abstract class Discord {
    */
   static async init(config: BuildinatorConfig): Promise<void> {
     this._config = config;
+    this._client.commands = new Collection();
+
+    const commandsPath = path.join(__dirname, 'commands');
+    const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+
+    for (const file of commandFiles) {
+      const filePath = path.join(commandsPath, file);
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const command = require(filePath).default;
+      if ('data' in command && 'execute' in command) {
+        this._client.commands.set(command.data.name, { data: command.data, command });
+      } else {
+        console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+      }
+    }
 
     // Register any EventBus event handlers within this on 'ready' event.
-    this._client.on('ready', async () => {
+    this._client.on(DiscordEvents.ClientReady, async () => {
       EventBus.eventEmitter.on(
         Events.GatheringScheduled,
         this.gatheringScheduledHandler.bind(this),
@@ -71,6 +99,33 @@ export default abstract class Discord {
       await this.registerDiscordEventListeners();
       await this.joinBrewWithMeChannel();
     });
+    this._client.on(DiscordEvents.InteractionCreate, async interaction => {
+      if (!interaction.isChatInputCommand()) return;
+
+      const command = (interaction.client as DiscordClient).commands.get(interaction.commandName);
+
+      if (!command) {
+        console.error(`No command matching ${interaction.commandName} was found.`);
+        return;
+      }
+
+      try {
+        await command.command.execute(interaction);
+      } catch (error) {
+        console.error(error);
+        if (interaction.replied || interaction.deferred) {
+          await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
+        } else {
+          await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+        }
+      }
+    });
+
+    const rest = new REST().setToken(this._config.DISCORD_TOKEN);
+    await rest.put(
+      Routes.applicationGuildCommands(this._config.DISCORD_CLIENT_ID, this._config.DISCORD_GUILD_ID),
+      { body: this._client.commands.map(c => c.data.toJSON()) },
+    );
 
     await this._client.login(this._config.DISCORD_TOKEN);
   }
@@ -186,7 +241,7 @@ export default abstract class Discord {
         // If the attendee was around for at least 15 minutes, log their
         // attendance in Orbit.
         if (totalDurationInMinutes >= 15) {
-          
+
           await Orbit.addActivity(
             {
               title: `Attended ${newGuildScheduledEvent.name}`,
@@ -301,13 +356,13 @@ export default abstract class Discord {
           // If the Notion event has a `discordEventId`, we've already created
           // it in Discord. In that event, we need to update/delete the event
           // in Discord.
-        !gathering.discordEventId ||
-        gathering.discordEventId?.length === 0
+          !gathering.discordEventId ||
+            gathering.discordEventId?.length === 0
             ? await this.createScheduledEvent(gathering)
             : await this.updateScheduledEvent(gathering);
         }
       }
-    } catch(error) {
+    } catch (error) {
       log(LogLevel.Error, LogArea.Discord, `gatheringScheduledHandler: ${error}`);
     }
   }
@@ -337,19 +392,19 @@ export default abstract class Discord {
   static async discordSayHandler(discordSayEvent: DiscordSayEvent) {
     try {
       const guild = await this.getGuild();
-      if (guild) { 
+      if (guild) {
         const channel = await guild.channels.cache.get(discordSayEvent.channelId) as TextChannel;
         if (channel) {
-         await channel.send(discordSayEvent.message);
+          await channel.send(discordSayEvent.message);
         }
       }
-     } catch (error) {
-        log(
-          LogLevel.Error,
-          LogArea.Discord,
-          `Error sending message in Discord ${discordSayEvent.type}}\n${error}`,
-        );
-      }
+    } catch (error) {
+      log(
+        LogLevel.Error,
+        LogArea.Discord,
+        `Error sending message in Discord ${discordSayEvent.type}}\n${error}`,
+      );
+    }
   }
 
   static async pullRequestMergedHandler(

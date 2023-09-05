@@ -1,14 +1,14 @@
-import {Events} from '../../constants';
-import {EventBus} from '../../events';
-import {OnSayEvent} from '../../types/events/onSayEvent';
+import { Events } from '../../constants';
+import { EventBus } from '../../events';
+import { OnSayEvent } from '../../types/events/onSayEvent';
 
-import {CommandRegistry} from '../commandRegistry';
+import { CommandRegistry } from '../commandRegistry';
 
 /**
  * Sends a message to chat listing all available commands
  * @param onCommandEvent
  */
-export function help(): void {
+export default function (): void {
   const commands = CommandRegistry.getCommands()
     .map(c => {
       return `!${c.commandName}`;

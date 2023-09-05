@@ -1,15 +1,15 @@
-import {Events} from '../../constants';
-import {ShouldThrottle} from '../shouldThrottle';
-import {EventBus} from '../../events';
-import {OnCommandEvent} from '../../types/events/onCommandEvent';
-import {OnSayEvent} from '../../types/events/onSayEvent';
-import {OnSoundEffectEvent} from '../../types/events/onSoundEffectEvent';
+import { Events } from '../../constants';
+import { ShouldThrottle } from '../shouldThrottle';
+import { EventBus } from '../../events';
+import { OnCommandEvent } from '../../types/events/onCommandEvent';
+import { OnSayEvent } from '../../types/events/onSayEvent';
+import { OnSoundEffectEvent } from '../../types/events/onSoundEffectEvent';
 
 /**
  * Alerts the streamer to pay attention to chat
  * @param onCommandEvent
  */
-export function attention(onCommandEvent: OnCommandEvent): void {
+export default function (onCommandEvent: OnCommandEvent): void {
   const cooldownSeconds = 120;
 
   // The broadcaster is allowed to bypass throttling. Otherwise,
