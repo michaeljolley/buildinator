@@ -229,13 +229,13 @@ export default abstract class TwitchAPI {
           // it in Twitch. In that event, we need to update/delete the event
           // in Twitch.
           !gathering.twitchEventId ||
-          gathering.twitchEventId?.length === 0
+            gathering.twitchEventId?.length === 0
             ? await this.api.createScheduledStream(gathering)
             : await this.api.updateScheduledStream(gathering);
         }
       }
     }
-    catch(error) {
+    catch (error) {
       log(LogLevel.Error, LogArea.TwitchAPI, `gatheringScheduledHandler: ${error}`);
     }
   }

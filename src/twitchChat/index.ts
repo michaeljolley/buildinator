@@ -10,23 +10,23 @@ import ComfyJS, {
   OnCheerExtra,
 } from 'comfy.js';
 import sanitizeHtml from 'sanitize-html';
-import {SubMethods} from 'tmi.js';
+import { SubMethods } from 'tmi.js';
 
-import {BuildinatorConfig} from '../types/buildinatorConfig';
-import {CommandMonitor} from './commandMonitor';
-import {EventBus} from '../events';
-import {Events} from '../constants';
-import {OnSayEvent} from '../types/events/onSayEvent';
-import {LogArea, LogLevel, log} from '../log';
-import {OnSubEvent} from '../types/events/onSubEvent';
-import {User} from '../types/user';
-import {OnCommandEvent} from '../types/events/onCommandEvent';
-import {OnChatMessageEvent} from '../types/events/onChatMessageEvent';
-import {OnJoinEvent} from '../types/events/onJoinEvent';
-import {OnPartEvent} from '../types/events/onPartEvent';
-import {OnCheerEvent} from '../types/events/onCheerEvent';
-import {OnRaidEvent} from '../types/events/onRaidEvent';
-import {Emote} from '../types/emote';
+import { BuildinatorConfig } from '../types/buildinatorConfig';
+import { CommandMonitor } from './commandMonitor';
+import { EventBus } from '../events';
+import { Events } from '../constants';
+import { OnSayEvent } from '../types/events/onSayEvent';
+import { LogArea, LogLevel, log } from '../log';
+import { OnSubEvent } from '../types/events/onSubEvent';
+import { User } from '../types/user';
+import { OnCommandEvent } from '../types/events/onCommandEvent';
+import { OnChatMessageEvent } from '../types/events/onChatMessageEvent';
+import { OnJoinEvent } from '../types/events/onJoinEvent';
+import { OnPartEvent } from '../types/events/onPartEvent';
+import { OnCheerEvent } from '../types/events/onCheerEvent';
+import { OnRaidEvent } from '../types/events/onRaidEvent';
+import { Emote } from '../types/emote';
 import TwitchAPI from '../twitchAPI';
 
 export default abstract class TwitchChat {
@@ -99,7 +99,7 @@ export default abstract class TwitchChat {
     self: boolean,
     extra: OnMessageExtra,
   ) {
-    log(LogLevel.Info, LogArea.Twitch, `onChat: ${user}: ${message}`);
+    // log(LogLevel.Info, LogArea.Twitch, `onChat: ${user}: ${message}`);
 
     user = user.toLocaleLowerCase();
 
@@ -223,7 +223,7 @@ export default abstract class TwitchChat {
   }
 
   private static async onJoin(user: string, self: boolean) {
-    log(LogLevel.Info, LogArea.Twitch, `onJoin: ${user}`);
+    // log(LogLevel.Info, LogArea.Twitch, `onJoin: ${user}`);
     let userInfo: User | undefined;
 
     try {
@@ -238,7 +238,7 @@ export default abstract class TwitchChat {
   }
 
   private static async onPart(user: string, self: boolean) {
-    log(LogLevel.Info, LogArea.Twitch, `onPart: ${user}`);
+    // log(LogLevel.Info, LogArea.Twitch, `onPart: ${user}`);
     let userInfo: User | undefined;
 
     try {

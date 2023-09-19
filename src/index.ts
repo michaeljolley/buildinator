@@ -18,6 +18,8 @@ const config: BuildinatorConfig = {
   ORBIT_WORKSPACE: process.env.ORBIT_WORKSPACE as string,
   GITHUB_WEBHOOK_SECRET: process.env.GH_WEBHOOK_SECRET as string,
   DISCORD_GUILD_ID: process.env.DISCORD_GUILD_ID as string,
+  DISCORD_CHANNEL_ID_ANNOUNCEMENTS: process.env
+    .DISCORD_CHANNEL_ID_ANNOUNCEMENTS as string,
   DISCORD_CHANNEL_ID_BREW_WITH_ME: process.env
     .DISCORD_CHANNEL_ID_BREW_WITH_ME as string,
   DISCORD_CLIENT_ID: process.env

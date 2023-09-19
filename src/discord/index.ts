@@ -15,7 +15,9 @@ import {
   VoiceState,
   Events as DiscordEvents,
   REST,
-  Routes
+  Routes,
+  EmbedBuilder,
+  Colors
 } from 'discord.js';
 import { titleCase } from 'title-case';
 import { EventBus } from '../events';
@@ -28,6 +30,7 @@ import { BuildinatorConfig } from '../types/buildinatorConfig';
 import { GatheringEvent } from '../types/gatheringEvent';
 import { DiscordSayEvent } from '../types/discordSayEvent';
 import { GitHubPullRequestEvent } from '../types/githubPullRequestEvent';
+import { OnStreamEvent } from '../types/events/onStreamEvent';
 
 const DISCORD_INTENTS = [
   GatewayIntentBits.Guilds,
@@ -128,6 +131,10 @@ export default abstract class Discord {
     );
 
     await this._client.login(this._config.DISCORD_TOKEN);
+
+    EventBus.eventEmitter.addListener(Events.OnStreamStart, (onStreamEvent: OnStreamEvent) =>
+      this.onStreamStart(onStreamEvent),
+    );
   }
 
   /**
@@ -395,7 +402,10 @@ export default abstract class Discord {
       if (guild) {
         const channel = await guild.channels.cache.get(discordSayEvent.channelId) as TextChannel;
         if (channel) {
-          await channel.send(discordSayEvent.message);
+          await channel.send({
+            content: discordSayEvent.message,
+            embeds: discordSayEvent.embeds,
+          });
         }
       }
     } catch (error) {
@@ -619,5 +629,29 @@ export default abstract class Discord {
       );
     }
     return undefined;
+  }
+
+  static async onStreamStart(onStreamEvent: OnStreamEvent): Promise<void> {
+    const embed = new EmbedBuilder()
+      .setTitle(onStreamEvent.stream?.title)
+      .setURL('https://twitch.tv/baldbeardedbuilder')
+      .setAuthor({
+        name: 'Bald Bearded Builder',
+        url: 'https://twitch.tv/baldbeardedbuilder',
+        iconURL: 'https://res.cloudinary.com/dk3rdh3yo/image/upload/v1695143445/my-head.png',
+      })
+      .setColor(Colors.DarkPurple)
+      .setThumbnail('https://res.cloudinary.com/dk3rdh3yo/image/upload/v1695143445/my-head.png')
+      .setImage(onStreamEvent.stream?.thumbnail_url.replace("{width}", "1280").replace("{height}", "720"))
+      .setFields({ name: "Viewers", value: onStreamEvent.stream?.viewer_count.toString() })
+
+    const sayEventMessage = {
+      channelId: this._config.DISCORD_CHANNEL_ID_ANNOUNCEMENTS,
+      message: `Hey <@&719759562978230323>! It's time to do the do. We're live on Twitch right now. Get to https://twitch.tv/baldbeardedbuilder to join in the fun!`,
+      type: "streamStart",
+      embeds: [embed]
+    } as DiscordSayEvent;
+
+    EventBus.eventEmitter.emit(Events.DiscordSay, sayEventMessage)
   }
 }

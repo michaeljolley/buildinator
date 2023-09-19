@@ -192,6 +192,8 @@ export default class API {
             started_at: streamData.started_at,
             streamDate,
             title: streamData.title,
+            thumbnail_url: streamData.thumbnail_url,
+            viewer_count: streamData.viewer_count,
           } as Stream;
         }
       }
