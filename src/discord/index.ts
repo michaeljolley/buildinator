@@ -530,12 +530,16 @@ export default abstract class Discord {
           );
         }
       } else {
+
+        const image = await this.getGatheringCoverImage(gathering);
+
         // The event was found, so update it.
         const updatedEvent = discordEvent.edit({
           name: gathering.name,
           description: gathering.description as string,
           scheduledStartTime: gathering.releaseDateStart as string,
           scheduledEndTime: gathering.releaseDateEnd,
+          image
         });
 
         if (updatedEvent !== undefined) {
@@ -606,15 +610,12 @@ export default abstract class Discord {
     gathering: GatheringEvent,
   ): Promise<string | undefined> {
     try {
-      const titleString = `/l_text:Cairo_56_bold_line_spacing_-45:${encodeURI(
-        titleCase(gathering.name),
-      )},g_north_west,x_65,y_255,w_900,c_fit,co_rgb:FFFFFF`;
-      const urlString = `/l_text:Cairo_24_regular_letter_spacing_4:twitch.tv%5Cbaldbeardedbuilder,g_north_west,x_65,y_215,co_rgb:0AC2C2`;
+      const titleString = encodeURI(gathering.name.replace(/,/g, "%2C"));
 
       const coverImageUrl =
         gathering.type === NOTION_EVENT_TYPE_BREW_WITH_ME
           ? BUILD_WITH_ME_DISCORD_EVENT_COVER_IMAGE
-          : `https://res.cloudinary.com/dk3rdh3yo/image/upload/b_rgb:000${urlString}${titleString}/ograph-base.png`;
+          : `https://res.cloudinary.com/dk3rdh3yo/image/upload/g_south_west,x_40,y_40,w_700,c_fit,co_white,l_text:Roboto_48_bold:${titleString}/website-assets/800x320.png`;
 
       const response = await fetch(coverImageUrl);
       const respBuffer = await response.arrayBuffer();
