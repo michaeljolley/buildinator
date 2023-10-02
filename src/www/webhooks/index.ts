@@ -31,7 +31,7 @@ export function webhooksRouter(config: BuildinatorConfig): Router {
 
   router.use('/hookdeck/twitch', (req, res) => {
     if (!verifyHeaders(req))
-      return;
+      res.status(422).send();
 
     switch (req.body.subscription.type) {
       case "channel.follow":
@@ -46,7 +46,6 @@ export function webhooksRouter(config: BuildinatorConfig): Router {
     }
 
     res.status(200).send();
-
   });
 
   /**
