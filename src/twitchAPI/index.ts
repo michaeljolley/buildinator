@@ -9,16 +9,12 @@ import { GatheringEvent } from '../types/gatheringEvent';
 import { Stream } from '../types/stream';
 import { TwitchFollowEvent } from '../types/twitchFollowEvent';
 import { TwitchStreamEvent } from '../types/twitchStreamEvent';
-import { TwitchWebSocketMessage } from '../types/twitchWebSocketMessage';
-import { TwitchWebSocketPayloadSession } from '../types/twitchWebSocketPayloadSession';
 import { User } from '../types/user';
 import { UserEvent } from '../types/userEvent';
 import API from './api';
-import { WebSocket, MessageEvent } from 'ws';
 
 export default abstract class TwitchAPI {
   private static _config: BuildinatorConfig;
-  private static client: WebSocket;
   private static api: API;
 
   static init(config: BuildinatorConfig) {
@@ -31,70 +27,10 @@ export default abstract class TwitchAPI {
 
     this.api = new API(this._config);
 
-    this.client = new WebSocket('wss://eventsub.wss.twitch.tv/ws');
-
-    this.client.onclose = () => {
-      log(
-        LogLevel.Info,
-        LogArea.TwitchAPI,
-        `Twitch WS: Reconnecting to Twitch`,
-      );
-      this.client = new WebSocket('wss://eventsub.wss.twitch.tv/ws');
-    };
-
-    this.client.onerror = err => {
-      log(LogLevel.Error, LogArea.TwitchAPI, `Twitch WS: ${err}`);
-    };
-
-    this.client.onmessage = async (event: MessageEvent) =>
-      await this.clientMessage(JSON.parse(event.data as string));
+    this.api.registerWebhookSubscriptions()
   }
 
-  private static async clientMessage(message: TwitchWebSocketMessage) {
-    switch (message.metadata.message_type) {
-      case 'session_welcome':
-      case 'session_reconnect':
-        if (message.payload.session) {
-          await this.clientRegisterSubscriptions(message.payload.session);
-        }
-        break;
-
-      case 'revocation':
-      case 'session_keepalive':
-        break;
-
-      case 'notification':
-        await this.clientHandleNotification(message);
-    }
-  }
-
-  private static async clientRegisterSubscriptions(
-    session: TwitchWebSocketPayloadSession,
-  ) {
-    await TwitchAPI.registerWebSocketSubscriptions(session.id);
-  }
-
-  private static async clientHandleNotification(
-    message: TwitchWebSocketMessage,
-  ) {
-    switch (message.metadata.subscription_type) {
-      case 'channel.follow':
-        await this.clientHandleOnFollow(
-          message.payload.event as TwitchFollowEvent,
-        );
-        break;
-      case 'stream.offline':
-        await this.clientHandleStreamOffline();
-        break;
-      case 'stream.online':
-        await this.clientHandleStreamOnline(
-          message.payload.event as TwitchStreamEvent,
-        );
-        break;
-    }
-  }
-
-  private static async clientHandleOnFollow(
+  static async clientHandleOnFollow(
     twitchFollowEvent: TwitchFollowEvent,
   ) {
     let userInfo: User | undefined;
@@ -113,14 +49,14 @@ export default abstract class TwitchAPI {
     }
   }
 
-  private static async clientHandleStreamOffline() {
+  static async clientHandleStreamOffline() {
     const streamDate = new Date().toLocaleDateString('en-US');
     const stream = await this.api.getStream(streamDate);
     log(LogLevel.Info, LogArea.TwitchAPI, `WS Stream Offline: ${streamDate}`);
     this.emit(Events.OnStreamEnd, { stream } as OnStreamEvent);
   }
 
-  private static async clientHandleStreamOnline(
+  static async clientHandleStreamOnline(
     streamOnlineEvent: TwitchStreamEvent,
   ) {
     if (streamOnlineEvent.started_at) {
@@ -140,12 +76,6 @@ export default abstract class TwitchAPI {
       log(LogLevel.Info, LogArea.TwitchAPI, `WS Stream Online: ${streamDate}`);
       this.emit(Events.OnStreamStart, { stream } as OnStreamEvent);
     }
-  }
-
-  static async registerWebSocketSubscriptions(
-    sessionId: string,
-  ): Promise<void> {
-    await this.api.registerWebSocketSubscriptions(sessionId);
   }
 
   /**

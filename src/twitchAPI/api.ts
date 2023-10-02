@@ -12,6 +12,7 @@ export default class API {
   private twitchAPIScheduleEndpoint = `${this.twitchAPIEndpoint}/schedule/segment`;
 
   private headers: Headers;
+  private headersAppToken: Headers;
   private headersNoScope: Headers;
   private _config: BuildinatorConfig;
 
@@ -19,6 +20,11 @@ export default class API {
     this._config = config;
     this.headers = new Headers([
       ["Authorization", `Bearer ${this._config.TWITCH_AUTH_TOKEN}`],
+      ['Content-Type', 'application/json'],
+      ['Client-ID', this._config.TWITCH_CLIENT_ID]
+    ]);
+    this.headersAppToken = new Headers([
+      ["Authorization", `Bearer ${this._config.TWITCH_APP_TOKEN}`],
       ['Content-Type', 'application/json'],
       ['Client-ID', this._config.TWITCH_CLIENT_ID]
     ]);
@@ -32,21 +38,21 @@ export default class API {
   /**
    * Registers all websocket subscriptions with Twitch directed to this instance of the bot
    */
-  public async registerWebSocketSubscriptions(
-    sessionId: string,
+  public async registerWebhookSubscriptions(
   ): Promise<void> {
     log(
       LogLevel.Info,
       LogArea.TwitchAPI,
-      'Registering WebSocket subscriptions',
+      'Registering Webhook subscriptions',
     );
 
-    await this.registerFollowWSSubscription(sessionId);
-    await this.registerStreamOnlineWSSubscription(sessionId);
-    await this.registerStreamOfflineWSSubscription(sessionId);
+    await this.unregisterWebhookSubscriptions();
+    await this.registerFollowWHSubscription();
+    await this.registerStreamOnlineWHSubscription();
+    await this.registerStreamOfflineWHSubscription();
   }
 
-  private async registerFollowWSSubscription(sessionId: string): Promise<void> {
+  private async registerFollowWHSubscription(): Promise<void> {
     try {
       const payload = {
         type: 'channel.follow',
@@ -56,44 +62,49 @@ export default class API {
           moderator_user_id: this._config.TWITCH_CHANNEL_ID,
         },
         transport: {
-          method: 'websocket',
-          session_id: sessionId,
+          method: 'webhook',
+          callback: "https://hkdk.events/mpE6TOiAn8Cg",
+          secret: this._config.TWITCH_WEBHOOK_SECRET
         },
       };
 
       const response = await fetch(this.twitchAPIWebhookEndpoint, {
         method: 'POST',
-        headers: this.headers,
+        headers: this.headersAppToken,
         body: JSON.stringify(payload),
       });
+
       log(
         LogLevel.Info,
         LogArea.TwitchAPI,
-        `registerFollowWSSubscription - Response ${response.status}`,
+        `registerFollowWHSubscription - Response ${response.status}`,
       );
     } catch (err) {
       log(
         LogLevel.Error,
         LogArea.TwitchAPI,
-        `registerFollowWSSubscription ${err}`,
+        `registerFollowWHSubscription ${err}`,
       );
     }
   }
 
-  private async registerStreamOnlineWSSubscription(
-    sessionId: string,
+  private async registerStreamOnlineWHSubscription(
   ): Promise<void> {
     try {
       const payload = {
         type: 'stream.online',
         version: '1',
         condition: { broadcaster_user_id: `${this._config.TWITCH_CHANNEL_ID}` },
-        transport: { method: 'websocket', session_id: sessionId },
+        transport: {
+          method: 'webhook',
+          callback: "https://hkdk.events/mpE6TOiAn8Cg",
+          secret: this._config.TWITCH_WEBHOOK_SECRET
+        },
       };
 
       const response = await fetch(this.twitchAPIWebhookEndpoint, {
         method: 'POST',
-        headers: this.headersNoScope,
+        headers: this.headersAppToken,
         body: JSON.stringify(payload),
       });
       log(
@@ -110,20 +121,23 @@ export default class API {
     }
   }
 
-  private async registerStreamOfflineWSSubscription(
-    sessionId: string,
+  private async registerStreamOfflineWHSubscription(
   ): Promise<void> {
     try {
       const payload = {
         type: 'stream.offline',
         version: '1',
         condition: { broadcaster_user_id: `${this._config.TWITCH_CHANNEL_ID}` },
-        transport: { method: 'websocket', session_id: sessionId },
+        transport: {
+          method: 'webhook',
+          callback: "https://hkdk.events/mpE6TOiAn8Cg",
+          secret: this._config.TWITCH_WEBHOOK_SECRET
+        },
       };
 
       const response = await fetch(this.twitchAPIWebhookEndpoint, {
         method: 'POST',
-        headers: this.headersNoScope,
+        headers: this.headersAppToken,
         body: JSON.stringify(payload),
       });
       log(
@@ -136,6 +150,32 @@ export default class API {
         LogLevel.Error,
         LogArea.TwitchAPI,
         `registerStreamOfflineWSSubscription ${err}`,
+      );
+    }
+  }
+
+  private async unregisterWebhookSubscriptions(): Promise<void> {
+    try {
+
+      const subsResponse = await fetch(this.twitchAPIWebhookEndpoint, {
+        method: 'GET',
+        headers: this.headersAppToken,
+      });
+
+      const { data: subscriptions } = await subsResponse.json();
+
+      await Promise.all(subscriptions.map((sub: { id: string }) => {
+        return fetch(`${this.twitchAPIWebhookEndpoint}?id=${sub.id}`, {
+          method: 'DELETE',
+          headers: this.headersAppToken
+        });
+      }))
+
+    } catch (err) {
+      log(
+        LogLevel.Error,
+        LogArea.TwitchAPI,
+        `unregisterWebhookSubscriptions ${err}`,
       );
     }
   }

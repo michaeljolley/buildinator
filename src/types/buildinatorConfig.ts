@@ -9,11 +9,13 @@ export type BuildinatorConfig = {
   DISCORD_CHANNEL_ID_MOD_LOG: string;
   DISCORD_TOKEN: string;
   DISCORD_CLIENT_ID: string;
+  HOOKDECK_SIGNING_SECRET: string;
   PIPEDREAM_UPDATE_DISCORD_EVENT_ID_WEBHOOK: string;
   PIPEDREAM_UPDATE_TWITCH_EVENT_ID_WEBHOOK: string;
   WWW_PORT: number;
   WWW_HOST: string;
   DISCORD_ROLE_BUILDERS: string;
+  TWITCH_APP_TOKEN: string;
   TWITCH_BOT_USERNAME: string;
   TWITCH_CHANNEL_NAME: string;
   TWITCH_AUTH_TOKEN: string;
@@ -22,4 +24,5 @@ export type BuildinatorConfig = {
   TWITCH_CLIENT_ID: string;
   TWITCH_CHANNEL_ID: string;
   TWITCH_BOT_CHANNEL_ID: string;
+  TWITCH_WEBHOOK_SECRET: string;
 };
