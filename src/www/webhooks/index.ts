@@ -6,7 +6,6 @@ import { BuildinatorConfig } from '../../types/buildinatorConfig';
 import TwitchAPI from '../../twitchAPI';
 import { TwitchFollowEvent } from '../../types/twitchFollowEvent';
 import { TwitchStreamEvent } from '../../types/twitchStreamEvent';
-import { LogArea, LogLevel, log } from '../../log';
 
 export function webhooksRouter(config: BuildinatorConfig): Router {
   const router = Router();
@@ -31,7 +30,7 @@ export function webhooksRouter(config: BuildinatorConfig): Router {
 
   router.use('/hookdeck/twitch', (req, res) => {
     if (!verifyHeaders(req))
-      res.status(422).send();
+      res.status(403).send();
 
     switch (req.body.subscription.type) {
       case "channel.follow":

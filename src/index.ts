@@ -5,7 +5,6 @@ import axios, { AxiosResponse } from 'axios';
 import qs from 'querystring'
 import express from 'express';
 import http from 'http';
-import { v4 as uuidv4 } from 'uuid';
 
 import Discord from './discord';
 import TwitchChat from './twitchChat';
@@ -32,8 +31,6 @@ axios.post(`${TWITCH_API}?${authParams}`)
 async function init(response: AxiosResponse<TwitchTokenResponse>) {
 
   const twitchAuth = response.data
-
-  const twitch_webhook_secret = uuidv4();
 
   const config: BuildinatorConfig = {
     ORBIT_API_KEY: process.env.ORBIT_API_KEY as string,
@@ -68,7 +65,7 @@ async function init(response: AxiosResponse<TwitchTokenResponse>) {
     TWITCH_CLIENT_ID: process.env.TWITCH_CLIENT_ID as string,
     TWITCH_CHANNEL_ID: process.env.TWITCH_CHANNEL_ID as string,
     TWITCH_BOT_CHANNEL_ID: process.env.TWITCH_BOT_CHANNEL_ID as string,
-    TWITCH_WEBHOOK_SECRET: twitch_webhook_secret
+    TWITCH_WEBHOOK_SECRET: process.env.TWITCH_WEBHOOK_SECRET as string,
   };
 
   const app = express();
