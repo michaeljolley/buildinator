@@ -17,20 +17,25 @@ import {
   REST,
   Routes,
   EmbedBuilder,
-  Colors
+  Colors,
 } from 'discord.js';
-import { titleCase } from 'title-case';
-import { EventBus } from '../events';
-import { Events, NOTION_EVENT_TYPE_BREW_WITH_ME, NOTION_EVENT_TYPE_TWITCH, OrbitActivities } from '../constants';
-import { GatheringAttendee } from '../types/gatheringAttendee';
-import { BUILD_WITH_ME_DISCORD_EVENT_COVER_IMAGE } from './BUILD_WITH_ME_DISCORD_EVENT_COVER_IMAGE';
-import { LogArea, LogLevel, log } from '../log';
-import { Orbit } from '../orbit';
-import { BuildinatorConfig } from '../types/buildinatorConfig';
-import { GatheringEvent } from '../types/gatheringEvent';
-import { DiscordSayEvent } from '../types/discordSayEvent';
-import { GitHubPullRequestEvent } from '../types/githubPullRequestEvent';
-import { OnStreamEvent } from '../types/events/onStreamEvent';
+import {titleCase} from 'title-case';
+import {EventBus} from '../events';
+import {
+  Events,
+  NOTION_EVENT_TYPE_BREW_WITH_ME,
+  NOTION_EVENT_TYPE_TWITCH,
+  OrbitActivities,
+} from '../constants';
+import {GatheringAttendee} from '../types/gatheringAttendee';
+import {BUILD_WITH_ME_DISCORD_EVENT_COVER_IMAGE} from './BUILD_WITH_ME_DISCORD_EVENT_COVER_IMAGE';
+import {LogArea, LogLevel, log} from '../log';
+import {Orbit} from '../orbit';
+import {BuildinatorConfig} from '../types/buildinatorConfig';
+import {GatheringEvent} from '../types/gatheringEvent';
+import {DiscordSayEvent} from '../types/discordSayEvent';
+import {GitHubPullRequestEvent} from '../types/githubPullRequestEvent';
+import {OnStreamEvent} from '../types/events/onStreamEvent';
 
 const DISCORD_INTENTS = [
   GatewayIntentBits.Guilds,
@@ -44,10 +49,13 @@ const DISCORD_INTENTS = [
 ];
 
 class DiscordClient extends Client {
-  commands: Collection<string, {
-    data: any,
-    command: { execute: (interaction: any) => Promise<void> }
-  }> = new Collection();
+  commands: Collection<
+    string,
+    {
+      data: any;
+      command: {execute: (interaction: any) => Promise<void>};
+    }
+  > = new Collection();
 }
 
 /**
@@ -71,16 +79,23 @@ export default abstract class Discord {
     this._client.commands = new Collection();
 
     const commandsPath = path.join(__dirname, 'commands');
-    const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+    const commandFiles = fs
+      .readdirSync(commandsPath)
+      .filter(file => file.endsWith('.js'));
 
     for (const file of commandFiles) {
       const filePath = path.join(commandsPath, file);
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const command = require(filePath).default;
       if ('data' in command && 'execute' in command) {
-        this._client.commands.set(command.data.name, { data: command.data, command });
+        this._client.commands.set(command.data.name, {
+          data: command.data,
+          command,
+        });
       } else {
-        console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+        console.log(
+          `[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`,
+        );
       }
     }
 
@@ -105,10 +120,14 @@ export default abstract class Discord {
     this._client.on(DiscordEvents.InteractionCreate, async interaction => {
       if (!interaction.isChatInputCommand()) return;
 
-      const command = (interaction.client as DiscordClient).commands.get(interaction.commandName);
+      const command = (interaction.client as DiscordClient).commands.get(
+        interaction.commandName,
+      );
 
       if (!command) {
-        console.error(`No command matching ${interaction.commandName} was found.`);
+        console.error(
+          `No command matching ${interaction.commandName} was found.`,
+        );
         return;
       }
 
@@ -117,23 +136,33 @@ export default abstract class Discord {
       } catch (error) {
         console.error(error);
         if (interaction.replied || interaction.deferred) {
-          await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
+          await interaction.followUp({
+            content: 'There was an error while executing this command!',
+            ephemeral: true,
+          });
         } else {
-          await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+          await interaction.reply({
+            content: 'There was an error while executing this command!',
+            ephemeral: true,
+          });
         }
       }
     });
 
     const rest = new REST().setToken(this._config.DISCORD_TOKEN);
     await rest.put(
-      Routes.applicationGuildCommands(this._config.DISCORD_CLIENT_ID, this._config.DISCORD_GUILD_ID),
-      { body: this._client.commands.map(c => c.data.toJSON()) },
+      Routes.applicationGuildCommands(
+        this._config.DISCORD_CLIENT_ID,
+        this._config.DISCORD_GUILD_ID,
+      ),
+      {body: this._client.commands.map(c => c.data.toJSON())},
     );
 
     await this._client.login(this._config.DISCORD_TOKEN);
 
-    EventBus.eventEmitter.addListener(Events.OnStreamStart, (onStreamEvent: OnStreamEvent) =>
-      this.onStreamStart(onStreamEvent),
+    EventBus.eventEmitter.addListener(
+      Events.OnStreamStart,
+      (onStreamEvent: OnStreamEvent) => this.onStreamStart(onStreamEvent),
     );
   }
 
@@ -145,10 +174,7 @@ export default abstract class Discord {
       'guildScheduledEventUpdate',
       this.guildScheduledEventUpdateHandler.bind(this),
     );
-    this._client.on(
-      'guildMemberAdd',
-      this.guildMemberAddHandler.bind(this),
-    );
+    this._client.on('guildMemberAdd', this.guildMemberAddHandler.bind(this));
     this._client.on(
       'guildMemberRemove',
       this.guildMemberRemoveHandler.bind(this),
@@ -164,7 +190,6 @@ export default abstract class Discord {
     oldGuildScheduledEvent: GuildScheduledEvent<GuildScheduledEventStatus> | null,
     newGuildScheduledEvent: GuildScheduledEvent<GuildScheduledEventStatus>,
   ): Promise<void> {
-
     // If the event is a Brew With Me event, and it's completed, we need to
     // review any attendees and possibly assign them the Builders role.
     if (
@@ -248,15 +273,19 @@ export default abstract class Discord {
         // If the attendee was around for at least 15 minutes, log their
         // attendance in Orbit.
         if (totalDurationInMinutes >= 15) {
-
           await Orbit.addActivity(
             {
               title: `Attended ${newGuildScheduledEvent.name}`,
-              description: `Attended ${newGuildScheduledEvent.name} for ${Math.round(totalDurationInMinutes)} minutes`,
+              description: `Attended ${
+                newGuildScheduledEvent.name
+              } for ${Math.round(totalDurationInMinutes)} minutes`,
               activity_type: 'buildinator',
               activity_type_key: OrbitActivities.BrewWithMe,
               link: `https://discord.com/channels/${this._config.DISCORD_GUILD_ID}/${this._config.DISCORD_CHANNEL_ID_BREW_WITH_ME}`,
-              key: `discord:brew_with_me:${member.id}:${new Date().toISOString().slice(0, 10).replace('-', '.')}}`,
+              key: `discord:brew_with_me:${member.id}:${new Date()
+                .toISOString()
+                .slice(0, 10)
+                .replace('-', '.')}}`,
             },
             {
               uid: member.id,
@@ -363,33 +392,77 @@ export default abstract class Discord {
           // If the Notion event has a `discordEventId`, we've already created
           // it in Discord. In that event, we need to update/delete the event
           // in Discord.
-          !gathering.discordEventId ||
-            gathering.discordEventId?.length === 0
+          !gathering.discordEventId || gathering.discordEventId?.length === 0
             ? await this.createScheduledEvent(gathering)
             : await this.updateScheduledEvent(gathering);
         }
       }
     } catch (error) {
-      log(LogLevel.Error, LogArea.Discord, `gatheringScheduledHandler: ${error}`);
+      log(
+        LogLevel.Error,
+        LogArea.Discord,
+        `gatheringScheduledHandler: ${error}`,
+      );
     }
   }
 
   static async guildMemberAddHandler(member: GuildMember) {
-    log(LogLevel.Info, LogArea.Discord, `${member.nickname || member.user.username} has joined the server!`)
+    const memberName = member.nickname || member.user.username;
+
+    log(LogLevel.Info, LogArea.Discord, `${memberName} has joined the server!`);
     await this.discordSayHandler({
       type: 'guildMemberAdd',
       channelId: this._config.DISCORD_CHANNEL_ID_MOD_LOG as string,
-      message: `Heyo ${member.nickname || member.user.username} has joined the server! Be sure to welcome them in #general or #introductions.`,
-    })
+      message: `Heyo ${memberName} has joined the server! Be sure to welcome them in #general or #introductions.`,
+    });
+
+    const welcome = (
+      strings: TemplateStringsArray,
+      ...params: GuildMember[]
+    ) => {
+      return strings
+        .map((str, index) => {
+          `${str}${params[index] !== undefined ? params[index] : ''}`;
+        })
+        .join('');
+    };
+
+    const messages = [
+      welcome`We're in luck! ${member} is here to fix all our bugs. But first, what's your programming language of choice?`,
+      welcome`Awe snap. ${member} is here to write code and chew bubble gum. And they're all out of bubble gum.`,
+      welcome`Behold ye peasants, ${member} has come to rule our server with an iron fist. Okay, maybe not. But if you were, what would your title be?`,
+      welcome`Check it out! ${member} is coming in hot. Quick ${member}, you're sitting down for a serious coding session. What's your drink of choice?`,
+      welcome`Finally, ${member} has joined us. Okay ${member}, we're having a meetup and you have to order the pizza. What toppings are you getting?`,
+      welcome`We've been waiting for you ${member}. We're divided on whether someone should always write unit tests for code. What's your vote? Always, never, or it depends.`,
+      welcome`Fun fact: Y2K was much ado about nothing all because of the efforts of ${member}. Now is our chance to thank them for their efforts.`,
+      welcome`Look! ${member} is here to be a tie-breaker. ${member}, we're having a debate. Is a hot dog a sandwich?`,
+      welcome`Thank goodness ${member} is here to save the day. We're having a debate. Tabs or spaces?`,
+    ];
+
+    const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+
+    await this.discordSayHandler({
+      type: 'guildMemberAdd',
+      channelId: this._config.DISCORD_CHANNEL_ID_INTRO as string,
+      message: randomMessage,
+    });
   }
 
-  static async guildMemberRemoveHandler(member: GuildMember | PartialGuildMember) {
-    log(LogLevel.Info, LogArea.Discord, `${member.nickname || member.user.username} has left the server!`)
+  static async guildMemberRemoveHandler(
+    member: GuildMember | PartialGuildMember,
+  ) {
+    log(
+      LogLevel.Info,
+      LogArea.Discord,
+      `${member.nickname || member.user.username} has left the server!`,
+    );
     await this.discordSayHandler({
       type: 'guildMemberRemove',
       channelId: this._config.DISCORD_CHANNEL_ID_MOD_LOG as string,
-      message: `Goodbye ${member.nickname || member.user.username}! They've left the server.`,
-    })
+      message: `Goodbye ${
+        member.nickname || member.user.username
+      }! They've left the server.`,
+    });
   }
 
   /**
@@ -400,7 +473,9 @@ export default abstract class Discord {
     try {
       const guild = await this.getGuild();
       if (guild) {
-        const channel = await guild.channels.cache.get(discordSayEvent.channelId) as TextChannel;
+        const channel = (await guild.channels.cache.get(
+          discordSayEvent.channelId,
+        )) as TextChannel;
         if (channel) {
           await channel.send({
             content: discordSayEvent.message,
@@ -530,7 +605,6 @@ export default abstract class Discord {
           );
         }
       } else {
-
         const image = await this.getGatheringCoverImage(gathering);
 
         // The event was found, so update it.
@@ -539,7 +613,7 @@ export default abstract class Discord {
           description: gathering.description as string,
           scheduledStartTime: gathering.releaseDateStart as string,
           scheduledEndTime: gathering.releaseDateEnd,
-          image
+          image,
         });
 
         if (updatedEvent !== undefined) {
@@ -610,7 +684,7 @@ export default abstract class Discord {
     gathering: GatheringEvent,
   ): Promise<string | undefined> {
     try {
-      const titleString = encodeURI(gathering.name.replace(/,/g, "%2C"));
+      const titleString = encodeURI(gathering.name.replace(/,/g, '%2C'));
 
       const coverImageUrl =
         gathering.type === NOTION_EVENT_TYPE_BREW_WITH_ME
@@ -639,20 +713,30 @@ export default abstract class Discord {
       .setAuthor({
         name: 'Bald Bearded Builder',
         url: 'https://twitch.tv/baldbeardedbuilder',
-        iconURL: 'https://res.cloudinary.com/dk3rdh3yo/image/upload/v1695143445/my-head.png',
+        iconURL:
+          'https://res.cloudinary.com/dk3rdh3yo/image/upload/v1695143445/my-head.png',
       })
       .setColor(Colors.DarkPurple)
-      .setThumbnail('https://res.cloudinary.com/dk3rdh3yo/image/upload/v1695143445/my-head.png')
-      .setImage(onStreamEvent.stream?.thumbnail_url.replace("{width}", "1280").replace("{height}", "720"))
-      .setFields({ name: "Viewers", value: onStreamEvent.stream?.viewer_count.toString() })
+      .setThumbnail(
+        'https://res.cloudinary.com/dk3rdh3yo/image/upload/v1695143445/my-head.png',
+      )
+      .setImage(
+        onStreamEvent.stream?.thumbnail_url
+          .replace('{width}', '1280')
+          .replace('{height}', '720'),
+      )
+      .setFields({
+        name: 'Viewers',
+        value: onStreamEvent.stream?.viewer_count.toString(),
+      });
 
     const sayEventMessage = {
       channelId: this._config.DISCORD_CHANNEL_ID_ANNOUNCEMENTS,
       message: `Hey <@&719759562978230323>! It's time to do the do. We're live on Twitch right now. Get to https://twitch.tv/baldbeardedbuilder to join in the fun!`,
-      type: "streamStart",
-      embeds: [embed]
+      type: 'streamStart',
+      embeds: [embed],
     } as DiscordSayEvent;
 
-    EventBus.eventEmitter.emit(Events.DiscordSay, sayEventMessage)
+    EventBus.eventEmitter.emit(Events.DiscordSay, sayEventMessage);
   }
 }
