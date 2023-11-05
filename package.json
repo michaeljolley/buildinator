@@ -1,6 +1,6 @@
 {
   "name": "buildinator",
-  "version": "1.0.78",
+  "version": "1.0.79",
   "description": "Automated Discord community manager that integrates with GitHub, Notion, and Discord.",
   "main": "index.js",
   "scripts": {
