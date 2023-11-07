@@ -422,7 +422,7 @@ export default abstract class Discord {
     ) => {
       return strings
         .map((str, index) => {
-          `${str}${params[index] !== undefined ? params[index] : ''}`;
+          return `${str}${params[index] !== undefined ? params[index] : ''}`;
         })
         .join('');
     };
